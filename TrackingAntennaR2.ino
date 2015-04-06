@@ -18,16 +18,16 @@
 #include <Ethernet.h>
 #include <math.h>
 #include <Servo.h> 
-
+#define M_PI 3.14159265358979323
 
 // Enter a MAC address and IP address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {  
-  0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
-IPAddress ip(169,254,61,56);
+   0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
+IPAddress ip(169,254,121,150); 
 
 // Enter the IP address of the server you're connecting to:
-IPAddress server(169,254,61,55); 
+IPAddress server(169,254,121,149);
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
@@ -42,8 +42,8 @@ Servo myservo2;  // create servo object to control a servo
 
 void setup() {
   // attaches the servos
- // myservo1.attach(9);  //change the pins connected
- // myservo2.attach(10);
+  myservo1.attach(5);  //change the pins connected
+  myservo2.attach(6);
   
   // start the Ethernet connection:
   Ethernet.begin(mac,ip);
@@ -61,11 +61,12 @@ void setup() {
   // if you get a connection, report back via serial:
   if (client.connect(server, 1234)) {
     Serial.println("connected");
-  } 
+  }
   else {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
+
 }
 
 
@@ -83,7 +84,7 @@ int lineCnt = 0;
 //string of data
 String Data = "";
 String Column = "";
-const char *buff = Column.c_str();
+const char *buff = Column.c_str(); //was const char
 
 //comma positions of important data
 int latCnt = 0;
@@ -112,7 +113,7 @@ int GeRyz = 7;// yz tilt gear ratio
 //Angles
 int ThetaXY = 0;
 int ThetaYZ = 0;
-int CurrentTheta = 0;
+int currentTheta = 50;
 
 //Hypoteneuse of x,y coordinates
  double Hyp = 0;
@@ -127,15 +128,16 @@ int CurrentTheta = 0;
 void getXYCoordinates(double longitude, double latitude){
     xCoord = getDistance(olat, olong, olat, longitude);//Longitude relative to (0,0)
     yCoord = getDistance(olat, olong, latitude, olong);
-    Hyp = sqrt(sq(xCoord) + sq(yCoord)); //set the hypoteneuse to calculate the angle needed to tilt up/down
+    Hyp = getDistance(olat, olong, latitude, longitude);
+    //Hyp = sqrt(sq(xCoord) + sq(yCoord)); //set the hypoteneuse to calculate the angle needed to tilt up/down
 }
 
 float getDistance(double lat1, double lon1, double lat2, double lon2){ //in meters
     int EARTH_RADIUS = 6371; //km
-    double dtLat = radians(lat2 - lat1);
-    double dtLon = radians(lon2 - lon1);
+    double dtLat = (lat2 - lat1) * M_PI / 180;
+    double dtLon = (lon2 - lon1) * M_PI / 180;
 
-    float a = sin(dtLat / 2) * sin(dtLat / 2) + cos(radians(lat1)) * cos(radians(lat2)) * sin(dtLon / 2) * sin(dtLon / 2);
+    float a = sin(dtLat / 2) * sin(dtLat / 2) + cos(lat1 * M_PI / 180) * cos(lat2 * M_PI / 180) * sin(dtLon / 2) * sin(dtLon / 2);
     float c = (2 * atan2(sqrt(a),sqrt(1 - a))) * 1000;
     float d = EARTH_RADIUS * c;
     return d;
@@ -146,46 +148,74 @@ float getDistance(double lat1, double lon1, double lat2, double lon2){ //in mete
 
 
 
-int GetTheta (long double x, long double y){
+int GetThetaXY (long double x, long double y){
   int Theta = 0;
   
-    if (x >0 && y >0){
-      Theta = atan(y/x);
+    //if (x >0 && y >0){
+    //if((lat > -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
+    //(lat > tan(currentTheta * M_PI / 180) * lon + olong)){
+    if(lat > olat && lon > olong){
+      Theta = atan(y/x) * 180 / M_PI - currentTheta;
     }
     
-    if (x <0 && y >0){
-      Theta = 180 - atan(y/abs(x));
+    //if (x <0 && y >0){
+    //if((lat < -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
+    //(lat > tan(currentTheta * M_PI / 180) * lon + olong)){
+    if(lat > olat && lon < olong){
+      Theta = 180 - atan(y/abs(x)) * 180 / M_PI - currentTheta;
     }
     
-    if (x >0 && y <0){
-      Theta = 360 - atan(abs(y)/x);
+    //if (x >0 && y <0){
+    //if((lat > -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
+    //(lat < tan(currentTheta * M_PI / 180) * lon + olong)){
+    if(lat < olat && lon > olong){
+      Theta = 360 - atan(abs(y)/x) * 180 / M_PI - currentTheta;
     }
     
-    if (x <0 && y <0){
-      Theta = 180 + atan(abs(y)/abs(x));
+    //if (x <0 && y <0){
+    //f((lat < -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
+    //(lat < tan(currentTheta * M_PI / 180) * lon + olong)){ 
+    if(lat < olat && lon < olong){
+      Theta = 180 + atan(abs(y)/abs(x)) * 180 / M_PI - currentTheta;
     }
   
   return Theta;
   
 }
 
-
+int GetThetaYZ (long double x, long double y){
+  return degrees(atan(y/x)); 
+}
               
  
 int pos = 0;    // variable to store the servo position 
  
 
 void SetPan(int ThetaXY){
- if (myservo1.read() != ThetaXY){
-    myservo1.write(ThetaXY);              // tell servo to go to position in variable 'pos' 
+  /*
+ if ((myservo1.read() != (90 - ThetaXY/15)) && (ThetaXY != 0)){
+    myservo1.write(90 - ThetaXY/15)
+    ;              // tell servo to go to position in variable 'pos' -
+    delay(15);     // waits 15ms for the servo to reach the position
+    }
+    */
+   if ((myservo1.read() != (1472 - ThetaXY * 2 / 3)) && (ThetaXY != 0)){
+    myservo1.writeMicroseconds(1472 - ThetaXY * 2 / 3)
+    ;              // tell servo to go to position in variable 'pos' -
     delay(15);     // waits 15ms for the servo to reach the position
     }
 }
 
 
 void SetTilt(int ThetaYZ){
-  if (myservo2.read() != ThetaYZ){
-    myservo2.write(ThetaYZ);              // tell servo to go to position in variable 'pos' 
+  /*
+  if (myservo2.read() != abs(90 - ThetaYZ/2)){
+    myservo2.write(abs(90 - ThetaYZ/2));              // tell servo to go to position in variable 'pos' 
+    delay(15);     // waits 15ms for the servo to reach the position
+    }                     // waits 15ms for the servo to reach the position
+    */
+  if (myservo2.read() != abs(1472 - ThetaYZ*4)){
+    myservo2.writeMicroseconds(abs(1472 - ThetaYZ*4));              // tell servo to go to position in variable 'pos' 
     delay(15);     // waits 15ms for the servo to reach the position
     }                     // waits 15ms for the servo to reach the position
 }
@@ -208,7 +238,7 @@ void loop()
         
                       if (L1 == 1){
                            if (Column == "lat"){  //sets the comma count of each important column
-                             latCnt = commaCnt;
+                             latCnt = 0;//commaCnt;
                              //Serial.println(latCnt);
                            }
                            
@@ -226,9 +256,13 @@ void loop()
             
             
                      if (commaCnt == latCnt && L1 == 0){ //when we are at the latitude column, copy number into "latitude"
-                         buff = Column.c_str();
+                         //buff = Column.substring(0, 10).c_str();
+                         String tempBuff = Column.substring(2);
+                         buff = tempBuff.c_str();
+                         //buff[0] = ' ';
                          lat = strtod(buff,NULL);
-                         //Serial.println(lat);
+                         //Serial.println(tempBuff);
+                         //Serial.println(buff);
                      }
                        
                      if (commaCnt == longCnt && L1 == 0){ //when we are at the longitude column, copy number into "longitude"
@@ -255,8 +289,8 @@ void loop()
              
               
               if (L2 == 1 && L1 == 0 ){
-                olat = 49.8;
-                olong = -98.25;
+                olat = 43.5307769775391;
+                olong = -80.5768432617188;
                 oaltitude = 1.4375;
                 L2 = 0;//check bit for second line line
                          // Serial.println(lat);
@@ -274,16 +308,33 @@ void loop()
           
               if (L2 == 0 && L1 ==0){
               getXYCoordinates(lon,lat); //set cartesian coordinates
-              ThetaXY = GetTheta ( xCoord, yCoord);
-              ThetaYZ = GetTheta (Hyp, altitude);
+              ThetaXY = GetThetaXY ( xCoord, yCoord);
+              ThetaYZ = GetThetaYZ ( Hyp, altitude);
               
-              //SetPan(ThetaXY);
-              //SetTilt(ThetaYZ);
+              SetPan(ThetaXY);
+              SetTilt(ThetaYZ);
+              //myservo1.writeMicroseconds(1472);
+              //myservo2.writeMicroseconds(1472);
+              //myservo1.write(90);
+              //myservo2.write(90);
+              Serial.print("lat: ");
+              Serial.print(lat, 8);
+              Serial.print("\tlon: ");
+              Serial.print(lon, 8);
+              //Serial.print("\taltitude: ");
+              //Serial.print(altitude, 4);
               
-             
-              Serial.println(ThetaXY);
+              //Serial.print("\txCoord: ");
+              //Serial.print(xCoord, 3);
+              //Serial.print("\tyCoord: ");
+              //Serial.print//nt(yCoord, 3);
+              //Serial.print("\tHyp: ");
+              //Serial.print(Hyp);
+              Serial.print("\tThetaXY: ");
+              Serial.print(ThetaXY);
+              Serial.print("\tThetaYZ: ");
               Serial.println(ThetaYZ);
-              
+              //Servo::refresh();
             }
          
         }//endif new line check
@@ -315,7 +366,6 @@ void loop()
     // do nothing:
     while(true);
   }
-
   
 }
 
