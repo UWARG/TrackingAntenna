@@ -139,9 +139,7 @@ float getDistance(double lat1, double lon1, double lat2, double lon2){ //in mete
 
     float a = sin(dtLat / 2) * sin(dtLat / 2) + cos(lat1 * M_PI / 180) * cos(lat2 * M_PI / 180) * sin(dtLon / 2) * sin(dtLon / 2);
     float c = (2 * atan2(sqrt(a),sqrt(1 - a))) * 1000;
-    float d = EARTH_RADIUS * c;
-    return d;
-
+    return EARTH_RADIUS * c;
 }
 
 //--------------------------------------------------------Servo Functions---------------------------------------------------------------
@@ -151,30 +149,18 @@ float getDistance(double lat1, double lon1, double lat2, double lon2){ //in mete
 int GetThetaXY (long double x, long double y){
   int Theta = 0;
   
-    //if (x >0 && y >0){
-    //if((lat > -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
-    //(lat > tan(currentTheta * M_PI / 180) * lon + olong)){
     if(lat > olat && lon > olong){
       Theta = atan(y/x) * 180 / M_PI - currentTheta;
     }
     
-    //if (x <0 && y >0){
-    //if((lat < -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
-    //(lat > tan(currentTheta * M_PI / 180) * lon + olong)){
     if(lat > olat && lon < olong){
       Theta = 180 - atan(y/abs(x)) * 180 / M_PI - currentTheta;
     }
     
-    //if (x >0 && y <0){
-    //if((lat > -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
-    //(lat < tan(currentTheta * M_PI / 180) * lon + olong)){
     if(lat < olat && lon > olong){
       Theta = 360 - atan(abs(y)/x) * 180 / M_PI - currentTheta;
     }
     
-    //if (x <0 && y <0){
-    //f((lat < -tan((90 - currentTheta) * M_PI / 180) * lon + olat) && 
-    //(lat < tan(currentTheta * M_PI / 180) * lon + olong)){ 
     if(lat < olat && lon < olong){
       Theta = 180 + atan(abs(y)/abs(x)) * 180 / M_PI - currentTheta;
     }
@@ -256,9 +242,10 @@ void loop()
             
             
                      if (commaCnt == latCnt && L1 == 0){ //when we are at the latitude column, copy number into "latitude"
-                         //buff = Column.substring(0, 10).c_str();
-                         String tempBuff = Column.substring(2);
-                         buff = tempBuff.c_str();
+                         buff = Column.c_str();//comment this line out when using in the field
+                         //buff = Column.substring(0, 10).c_str();//comment this line in when using in the field
+                         //String tempBuff = Column.substring(2);//comment this line in when using in the field
+                         //buff = tempBuff.c_str();
                          //buff[0] = ' ';
                          lat = strtod(buff,NULL);
                          //Serial.println(tempBuff);
@@ -289,9 +276,9 @@ void loop()
              
               
               if (L2 == 1 && L1 == 0 ){
-                olat = 43.5307769775391;
-                olong = -80.5768432617188;
-                oaltitude = 1.4375;
+                olat = 49.911573;
+                olong = -98.270013;
+                oaltitude = 1.4;
                 L2 = 0;//check bit for second line line
                          // Serial.println(lat);
                          // Serial.println(lon);
@@ -317,17 +304,17 @@ void loop()
               //myservo2.writeMicroseconds(1472);
               //myservo1.write(90);
               //myservo2.write(90);
-              Serial.print("lat: ");
-              Serial.print(lat, 8);
-              Serial.print("\tlon: ");
-              Serial.print(lon, 8);
-              //Serial.print("\taltitude: ");
-              //Serial.print(altitude, 4);
+              //Serial.print("lat: ");
+              //Serial.print(lat, 8);
+              //Serial.print("\tlon: ");
+              //Serial.print(lon, 8);
+              Serial.print("\taltitude: ");
+              Serial.print(altitude, 4);
               
               //Serial.print("\txCoord: ");
               //Serial.print(xCoord, 3);
               //Serial.print("\tyCoord: ");
-              //Serial.print//nt(yCoord, 3);
+              //Serial.print(yCoord, 3);
               //Serial.print("\tHyp: ");
               //Serial.print(Hyp);
               Serial.print("\tThetaXY: ");
