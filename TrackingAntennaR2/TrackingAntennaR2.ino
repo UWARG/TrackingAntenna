@@ -1,33 +1,51 @@
 /*
-  Telnet client
- 
+
+15-05-02 Malcolm Williams Edit
+
  This sketch connects to a a telnet server (http://www.google.com)
  using an Arduino Wiznet Ethernet shield.  You'll need a telnet server 
  to test this with.
- Processing's ChatServer example (part of the network library) works well, 
- running on port 10002. It can be found as part of the examples
- in the Processing application, available at 
- http://processing.org/
- 
+
  Circuit:
  * Ethernet shield attached to pins 10, 11, 12, 13
  
+  myServo1 is the pan servo, pwm to pin 5.
+  myServo2 is the tilt servo, pwm6.
 
  */
+ 
 #include <SPI.h>
 #include <Ethernet.h>
 #include <math.h>
 #include <Servo.h> 
 #define M_PI 3.14159265358979323
 
-// Enter a MAC address and IP address for your controller below.
+
+/****           INITIALISATION VALUES       *************/
+
+#define INITIAL_LATTITUDE 48.58603668
+#define INITIAL_LONGITUDE -71.66143798
+#define INITIAL_ALTITUDE 6.5625
+
+// Enter a MAC address for your controller below.
 // The IP address will be dependent on your local network:
-byte mac[] = {  
-   0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
-IPAddress ip(169,254,121,150); 
+byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
+IPAddress ip(192,168,1,199); //this is for the arduino
 
 // Enter the IP address of the server you're connecting to:
-IPAddress server(169,254,121,149);
+IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
+
+#define INITIALISATION 0  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
+
+#define DEBUG 1  //turns on the printing to serial
+                          
+                          
+                          //can change THETA_OFFSET if this will invoke the wrap around condition.
+
+//#define THETA_OFFSET 30 //need to finnish this up
+
+/****        END OF INITIALISATION      **********/
+
 
 // Initialize the Ethernet client library
 // with the IP address and port of the server 
@@ -70,11 +88,6 @@ void setup() {
 }
 
 
-
-         
-
-
-
 //-----------------------------------VARIABLES FOR MAIN LOOP----------------------------
 
 //counts
@@ -101,6 +114,7 @@ double lat = 0;
 double lon = 0;
 double altitude = 0;
 
+//want to change all these to precompiler directives...
 double olat = 0; 
 double olong = 0;
 double oaltitude = 0;
@@ -116,7 +130,7 @@ int ThetaYZ = 0;
 int currentTheta = 50;
 
 //Hypoteneuse of x,y coordinates
- double Hyp = 0;
+double Hyp = 0;
 
 
 
@@ -146,7 +160,8 @@ float getDistance(double lat1, double lon1, double lat2, double lon2){ //in mete
 
 
 
-int GetThetaXY (long double x, long double y){
+int GetThetaXY (long double x, long double y)  // this method causes a overflow condtion, needs to change (wont go from 1 to -1, it will go from 1 to 359)
+{
   int Theta = 0;
   
     if(lat > olat && lon > olong){
@@ -185,9 +200,9 @@ void SetPan(int ThetaXY){
     delay(15);     // waits 15ms for the servo to reach the position
     }
     */
-   if ((myservo1.read() != (1472 - ThetaXY * 2 / 3)) && (ThetaXY != 0)){
-    myservo1.writeMicroseconds(1472 - ThetaXY * 2 / 3)
-    ;              // tell servo to go to position in variable 'pos' -
+   if ((myservo1.read() != (1472 - ThetaXY * 2 / 3  )) && (ThetaXY != 0))
+   {
+    myservo1.writeMicroseconds(1472 - ThetaXY * 2 / 3);              // tell servo to go to position in variable 'pos' -
     delay(15);     // waits 15ms for the servo to reach the position
     }
 }
@@ -242,10 +257,10 @@ void loop()
             
             
                      if (commaCnt == latCnt && L1 == 0){ //when we are at the latitude column, copy number into "latitude"
-                         buff = Column.c_str();//comment this line out when using in the field
-                         //buff = Column.substring(0, 10).c_str();//comment this line in when using in the field
-                         //String tempBuff = Column.substring(2);//comment this line in when using in the field
-                         //buff = tempBuff.c_str();
+                         //buff = Column.c_str();//comment this line out when using in the field
+                         buff = Column.substring(0, 10).c_str();//comment this line in when using in the field
+                         String tempBuff = Column.substring(2);//comment this line in when using in the field
+                         buff = tempBuff.c_str();
                          //buff[0] = ' ';
                          lat = strtod(buff,NULL);
                          //Serial.println(tempBuff);
@@ -276,9 +291,9 @@ void loop()
              
               
               if (L2 == 1 && L1 == 0 ){
-                olat = 49.911573;
-                olong = -98.270013;
-                oaltitude = 1.4;
+                olat = INITIAL_LATTITUDE;
+                olong = INITIAL_LONGITUDE;
+                oaltitude = INITIAL_ALTITUDE;
                 L2 = 0;//check bit for second line line
                          // Serial.println(lat);
                          // Serial.println(lon);
@@ -296,31 +311,43 @@ void loop()
               if (L2 == 0 && L1 ==0){
               getXYCoordinates(lon,lat); //set cartesian coordinates
               ThetaXY = GetThetaXY ( xCoord, yCoord);
-              ThetaYZ = GetThetaYZ ( Hyp, altitude);
+              ThetaYZ = GetThetaYZ ( Hyp, altitude - oaltitude);        //was missing the offset for initial altitude?
               
-              SetPan(ThetaXY);
-              SetTilt(ThetaYZ);
-              //myservo1.writeMicroseconds(1472);
-              //myservo2.writeMicroseconds(1472);
+              if(INITIALISATION)
+              {
+                
+                myservo1.writeMicroseconds(1472);
+                myservo2.writeMicroseconds(1472);
+              } else {
+                SetPan(ThetaXY);
+                SetTilt(ThetaYZ);
+              }
+
+              //myservo2.writeMicroseconds(1052);
+
               //myservo1.write(90);
               //myservo2.write(90);
-              //Serial.print("lat: ");
-              //Serial.print(lat, 8);
-              //Serial.print("\tlon: ");
-              //Serial.print(lon, 8);
-              Serial.print("\taltitude: ");
-              Serial.print(altitude, 4);
               
-              //Serial.print("\txCoord: ");
-              //Serial.print(xCoord, 3);
-              //Serial.print("\tyCoord: ");
-              //Serial.print(yCoord, 3);
-              //Serial.print("\tHyp: ");
-              //Serial.print(Hyp);
-              Serial.print("\tThetaXY: ");
-              Serial.print(ThetaXY);
-              Serial.print("\tThetaYZ: ");
-              Serial.println(ThetaYZ);
+              if(DEBUG)
+              {
+                 Serial.print("lat: ");
+                Serial.print(lat, 8);
+                Serial.print("\tlon: ");
+                Serial.print(lon, 8);
+                Serial.print("\taltitude: ");
+                Serial.print(altitude, 4);
+                
+                Serial.print("\txCoord: ");
+                Serial.print(xCoord, 3);
+                Serial.print("\tyCoord: ");
+                Serial.print(yCoord, 3);
+                Serial.print("\tHyp: ");
+                Serial.print(Hyp);
+                Serial.print("\tThetaXY: ");
+                Serial.print(ThetaXY);
+                Serial.print("\tThetaYZ: ");
+                Serial.println(ThetaYZ);
+              }
               //Servo::refresh();
             }
          

@@ -1,0 +1,23 @@
+Tracking Antenna Setup Guide
+
+1.	Plug the two cables from Arduino boards into a computer with antenna code.
+
+2.	In the Arduino code, comment out “SetPan(ThetaX); SetTilt(ThetaYZ);”.
+
+3.	Comment in “myservo1.writeMicroseconds(1472);myservo2.writeMicroseconds(1472);” then click the “arrow” button on the top to program the board. This will zero 	the antenna. Put the “wheel” for the servo on the top on facing up.
+
+4.	Change “myservo2.writeMicroseconds(1472);” into “myservo2.writeMicroseconds(1352);” This will lift  up 30 degrees so that you know which way you should install 	the antenna. Unplug the antenna from the battery. Install the antenna so that it is pointing 30 degrees upwards.
+
+5.	Plug the battery in. Antenna will zero itself horizontally while pointing 30 degrees up.
+
+6.	Face the antennas towards the right side of your flying field.
+
+7.	Make sure antenna is pointing towards the right hand side of the flying field with 30 degrees from horizontal.
+
+8.	Bring the plane over to where the antenna is and lift the plane up to antenna's height. (which will probably be useless since the altimeter is not stable and 	accurate.
+
+9.	Bring up the Ground Station, change these lines of code: “olat = 43.5309316668213; olong = -80.5773233337284; oaltitude = 1.4;” They are a few lines above the 	lines in step 2. This will be where the antenna thinks it is at (its origin).
+
+10.	Comment in “SetPan(ThetaX); SetTilt(ThetaYZ);”. Comment out “myservo1.writeMicroseconds(1472);myservo2.writeMicroseconds(1472);” then click the “arrow” button 	on the top to program the board. The antenna will start following the plane.
+
+Note: The antenna will spin a little once you open the serial monitor in Arduino because it zeros the antenna. Be careful.
