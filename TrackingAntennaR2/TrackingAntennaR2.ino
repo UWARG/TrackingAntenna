@@ -36,7 +36,7 @@ Model No. HITEC HS-785HB
 #define GEAR_RATIO_YZ 7  //how much it is geared down by
 #define GEAR_RATIO_XY 1
 
-/****           INITIALISATION VALUES       *************/
+/****           INITIALIZATION VALUES       *************/
 
 #define INITIAL_LATTITUDE 48.58603668
 #define INITIAL_LONGITUDE -71.66143798
@@ -50,11 +50,11 @@ IPAddress ip(192,168,1,199); //this is for the arduino
 // Enter the IP address of the server you're connecting to:
 IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
 
-#define INITIALISATION 0  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
+#define INITIALIZATION 1  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
 
 #define DEBUG 1  //turns on the printing to serial
 
-/****        END OF INITIALISATION      **********/
+/****        END OF INITIALIZATION      **********/
 
 
 // Initialize the Ethernet client library
@@ -309,7 +309,7 @@ void loop()
               ThetaXY = GetThetaXY ( xCoord, yCoord);
               ThetaYZ = GetThetaYZ ( Hyp, altitude - oaltitude);        //was missing the offset for initial altitude?
               
-              if(INITIALISATION)
+              if(INITIALIZATION)
               {
                 servoPan.writeMicroseconds(1500);
                 servoTilt.writeMicroseconds(1500);
@@ -320,7 +320,7 @@ void loop()
               
               if(DEBUG)
               {
-                 Serial.print("lat: ");
+                Serial.print("lat: ");
                 Serial.print(lat, 8);
                 Serial.print("\tlon: ");
                 Serial.print(lon, 8);
