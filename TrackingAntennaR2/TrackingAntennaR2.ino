@@ -1,7 +1,5 @@
 /*
 
-15-05-02 Malcolm Williams Edit
-
  This sketch connects to a a telnet server (http://www.google.com)
  using an Arduino Wiznet Ethernet shield.  You'll need a telnet server 
  to test this with.
@@ -9,17 +7,34 @@
  Circuit:
  * Ethernet shield attached to pins 10, 11, 12, 13
  
-  myServo1 is the pan servo, pwm to pin 5.
-  myServo2 is the tilt servo, pwm6.
+  servoPan is the pan servo, pwm to pin 5 (xy) .
+  servoTilt is the tilt servo, pwm6 (z).
 
+
+Servo Information: 
+Model No. HITEC HS-785HB
+    
+    Information taken from: http://www.robotshop.com/ca/en/hitec-hs785hb-servo-motor.html
+    
+    PWM 600 -> angle 0
+    PWM 2400 -> angle 1260
+    
+    Center = PWM 1500 -> angle 630
+    1 degree = PWM 1.429
+    
  */
  
 #include <SPI.h>
 #include <Ethernet.h>
 #include <math.h>
 #include <Servo.h> 
-#define M_PI 3.14159265358979323
 
+#define M_PI 3.14159265358979323
+#define SERVO_MIDPOINT 15000
+#define EARTH_RADIUS 6371000 //in m
+#define DEGREE_TO_PWM 0.7
+#define GEAR_RATIO_YZ 7  //how much it is geared down by
+#define GEAR_RATIO_XY 1
 
 /****           INITIALISATION VALUES       *************/
 
@@ -38,11 +53,6 @@ IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
 #define INITIALISATION 0  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
 
 #define DEBUG 1  //turns on the printing to serial
-                          
-                          
-                          //can change THETA_OFFSET if this will invoke the wrap around condition.
-
-//#define THETA_OFFSET 30 //need to finnish this up
 
 /****        END OF INITIALISATION      **********/
 
@@ -54,14 +64,15 @@ IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
 EthernetClient client;
 
 //Servo Objects
-Servo myservo1;  // create servo object to control a servo 
-Servo myservo2;  // create servo object to control a servo 
+Servo servoPan;  // create servo object to control a servo 
+Servo servoTilt;  // create servo object to control a servo 
 
 
 void setup() {
   // attaches the servos
-  myservo1.attach(5);  //change the pins connected
-  myservo2.attach(6);
+  //usage: servo.attach(pin, minPWM, maxPWM)
+  servoPan.attach(5, 600, 2400);
+  servoTilt.attach(6, 600, 2400);
   
   // start the Ethernet connection:
   Ethernet.begin(mac,ip);
@@ -119,11 +130,6 @@ double olat = 0;
 double olong = 0;
 double oaltitude = 0;
 
-
-//Gear Ratios
-int GeRxy = 1; //xy pan gear ratio
-int GeRyz = 7;// yz tilt gear ratio
-
 //Angles
 int ThetaXY = 0;
 int ThetaYZ = 0;
@@ -132,7 +138,8 @@ int currentTheta = 50;
 //Hypoteneuse of x,y coordinates
 double Hyp = 0;
 
-
+unsigned long servoPanLastWrite = 0;
+unsigned long servoTiltLastWrite = 0;
 
 
 // ---------------------------------FOR GPS CALCULATION FUNCTIONS --------------------------------------
@@ -147,13 +154,12 @@ void getXYCoordinates(double longitude, double latitude){
 }
 
 float getDistance(double lat1, double lon1, double lat2, double lon2){ //in meters
-    int EARTH_RADIUS = 6371; //km
+
     double dtLat = (lat2 - lat1) * M_PI / 180;
     double dtLon = (lon2 - lon1) * M_PI / 180;
 
     float a = sin(dtLat / 2) * sin(dtLat / 2) + cos(lat1 * M_PI / 180) * cos(lat2 * M_PI / 180) * sin(dtLon / 2) * sin(dtLon / 2);
-    float c = (2 * atan2(sqrt(a),sqrt(1 - a))) * 1000;
-    return EARTH_RADIUS * c;
+    return EARTH_RADIUS * (2 * atan2(sqrt(a),sqrt(1 - a)));
 }
 
 //--------------------------------------------------------Servo Functions---------------------------------------------------------------
@@ -190,35 +196,25 @@ int GetThetaYZ (long double x, long double y){
               
  
 int pos = 0;    // variable to store the servo position 
- 
 
-void SetPan(int ThetaXY){
-  /*
- if ((myservo1.read() != (90 - ThetaXY/15)) && (ThetaXY != 0)){
-    myservo1.write(90 - ThetaXY/15)
-    ;              // tell servo to go to position in variable 'pos' -
-    delay(15);     // waits 15ms for the servo to reach the position
-    }
-    */
-   if ((myservo1.read() != (1472 - ThetaXY * 2 / 3  )) && (ThetaXY != 0))
-   {
-    myservo1.writeMicroseconds(1472 - ThetaXY * 2 / 3);              // tell servo to go to position in variable 'pos' -
-    delay(15);     // waits 15ms for the servo to reach the position
+
+void SetPan(int ThetaXY)
+{
+    if(servoPanLastWrite + 15 > millis())    //give the servo time to move without stopping the entire program
+    {
+      servoPan.writeMicroseconds(SERVO_MIDPOINT - ThetaXY * DEGREE_TO_PWM);
+      servoPanLastWrite = millis();
     }
 }
 
 
-void SetTilt(int ThetaYZ){
-  /*
-  if (myservo2.read() != abs(90 - ThetaYZ/2)){
-    myservo2.write(abs(90 - ThetaYZ/2));              // tell servo to go to position in variable 'pos' 
-    delay(15);     // waits 15ms for the servo to reach the position
-    }                     // waits 15ms for the servo to reach the position
-    */
-  if (myservo2.read() != abs(1472 - ThetaYZ*4)){
-    myservo2.writeMicroseconds(abs(1472 - ThetaYZ*4));              // tell servo to go to position in variable 'pos' 
-    delay(15);     // waits 15ms for the servo to reach the position
-    }                     // waits 15ms for the servo to reach the position
+void SetTilt(int ThetaYZ)
+{    
+  if(servoTiltLastWrite + 15 > millis())
+  {
+    servoTilt.writeMicroseconds(abs(SERVO_MIDPOINT -  ThetaYZ * GEAR_RATIO_YZ * DEGREE_TO_PWM));
+    servoTiltLastWrite = millis();
+  }   
 }
 
 
@@ -315,18 +311,12 @@ void loop()
               
               if(INITIALISATION)
               {
-                
-                myservo1.writeMicroseconds(1472);
-                myservo2.writeMicroseconds(1472);
+                servoPan.writeMicroseconds(1500);
+                servoTilt.writeMicroseconds(1500);
               } else {
                 SetPan(ThetaXY);
                 SetTilt(ThetaYZ);
               }
-
-              //myservo2.writeMicroseconds(1052);
-
-              //myservo1.write(90);
-              //myservo2.write(90);
               
               if(DEBUG)
               {
