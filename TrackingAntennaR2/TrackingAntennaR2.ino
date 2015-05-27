@@ -30,7 +30,7 @@ Model No. HITEC HS-785HB
 #include <Servo.h> 
 
 #define M_PI 3.14159265358979323
-#define SERVO_MIDPOINT 15000
+#define SERVO_MIDPOINT 1500
 #define EARTH_RADIUS 6371000 //in m
 #define DEGREE_TO_PWM 0.7
 #define GEAR_RATIO_YZ 7  //how much it is geared down by
@@ -38,19 +38,20 @@ Model No. HITEC HS-785HB
 
 /****           INITIALIZATION VALUES       *************/
 
-#define INITIAL_LATTITUDE 48.58603668
-#define INITIAL_LONGITUDE -71.66143798
-#define INITIAL_ALTITUDE 6.5625
-
+#define INITIAL_LATTITUDE 0
+#define INITIAL_LONGITUDE 0
+#define INITIAL_ALTITUDE  0
+		
 // Enter a MAC address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
 IPAddress ip(192,168,1,199); //this is for the arduino
 
+
 // Enter the IP address of the server you're connecting to:
 IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
 
-#define INITIALIZATION 1  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
+#define INITIALIZATION 0  //0 if you want to track, 1 if you want to go to the home position. home position should be set to point straight east. 
 
 #define DEBUG 1  //turns on the printing to serial
 
@@ -138,8 +139,8 @@ int currentTheta = 50;
 //Hypoteneuse of x,y coordinates
 double Hyp = 0;
 
-unsigned long servoPanLastWrite = 0;
-unsigned long servoTiltLastWrite = 0;
+//unsigned long servoPanLastWrite = 0;
+//unsigned long servoTiltLastWrite = 0;
 
 
 // ---------------------------------FOR GPS CALCULATION FUNCTIONS --------------------------------------
@@ -171,19 +172,19 @@ int GetThetaXY (long double x, long double y)  // this method causes a overflow 
   int Theta = 0;
   
     if(lat > olat && lon > olong){
-      Theta = atan(y/x) * 180 / M_PI - currentTheta;
+      Theta = atan(y/x) * 180 / M_PI;
     }
     
     if(lat > olat && lon < olong){
-      Theta = 180 - atan(y/abs(x)) * 180 / M_PI - currentTheta;
+      Theta = 180 - atan(y/abs(x)) * 180 / M_PI;
     }
     
     if(lat < olat && lon > olong){
-      Theta = 360 - atan(abs(y)/x) * 180 / M_PI - currentTheta;
+      Theta = 360 - atan(abs(y)/x) * 180 / M_PI;
     }
     
     if(lat < olat && lon < olong){
-      Theta = 180 + atan(abs(y)/abs(x)) * 180 / M_PI - currentTheta;
+      Theta = 180 + atan(abs(y)/abs(x)) * 180 / M_PI;
     }
   
   return Theta;
@@ -200,21 +201,22 @@ int pos = 0;    // variable to store the servo position
 
 void SetPan(int ThetaXY)
 {
+    //
     if(servoPanLastWrite + 15 > millis())    //give the servo time to move without stopping the entire program
-    {
+    //{
       servoPan.writeMicroseconds(SERVO_MIDPOINT - ThetaXY * DEGREE_TO_PWM);
-      servoPanLastWrite = millis();
-    }
+      //servoPanLastWrite = millis();
+    //}
 }
 
 
 void SetTilt(int ThetaYZ)
 {    
-  if(servoTiltLastWrite + 15 > millis())
-  {
+  //if(servoTiltLastWrite + 15 > millis())
+  //{
     servoTilt.writeMicroseconds(abs(SERVO_MIDPOINT -  ThetaYZ * GEAR_RATIO_YZ * DEGREE_TO_PWM));
-    servoTiltLastWrite = millis();
-  }   
+    //servoTiltLastWrite = millis();
+  //}   
 }
 
 
@@ -311,11 +313,12 @@ void loop()
               
               if(INITIALIZATION)
               {
-                servoPan.writeMicroseconds(1500);
-                servoTilt.writeMicroseconds(1500);
+                servoPan.writeMicroseconds(SERVO_MIDPOINT);
+                servoTilt.writeMicroseconds(SERVO_MIDPOINT);
               } else {
                 SetPan(ThetaXY);
-                SetTilt(ThetaYZ);
+                servoTilt.writeMicroseconds(SERVO_MIDPOINT);
+                //SetTilt(ThetaYZ);
               }
               
               if(DEBUG)
