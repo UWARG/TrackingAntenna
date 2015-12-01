@@ -29,6 +29,10 @@ Model No. HITEC HS-785HB
 #include <math.h>
 #include <Servo.h> 
 
+#include <Wire.h>
+#include <Adafruit_Sensor.h>
+#include <Adafruit_LSM303_U.h>
+
 #define M_PI 3.14159265358979323
 #define SERVO_MIDPOINT 1500
 #define EARTH_RADIUS 6371000 //in m
@@ -68,6 +72,9 @@ EthernetClient client;
 Servo servoPan;  // create servo object to control a servo 
 Servo servoTilt;  // create servo object to control a servo 
 
+/* Assign a unique ID to the magnetometer at the same time */
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
+
 void setup() {
   // attaches the servos
   //usage: servo.attach(pin, minPWM, maxPWM)
@@ -95,6 +102,20 @@ void setup() {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
+
+  // magnetometer setup
+  /* Enable auto-gain */
+  mag.enableAutoRange(true);
+  
+  /* Initialise the sensor */
+  if(!mag.begin())
+  {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+    while(1);
+  }
+  /* Display some basic information on this sensor */
+ // displaySensorDetails();
  
 }
 
@@ -373,6 +394,21 @@ void loop()
     while(true);
   }
   
+   
+    /* Get a new magnetometer event */ 
+    sensors_event_t event; 
+    mag.getEvent(&event);
+  
+   double az = atan2(event.magnetic.y, event.magnetic.x) *180/PI +180 ;
+   
+    Serial.print("Az: "); Serial.print(az); Serial.println("  ");
+    //Display the results (magnetic vector values are in micro-Tesla (uT)) 
+   /*
+   Serial.print("X: "); Serial.print(event.magnetic.x); Serial.print("  ");
+    Serial.print("Y: "); Serial.print(event.magnetic.y); Serial.print("  ");
+    Serial.print("Z: "); Serial.print(event.magnetic.z); Serial.print("  ");Serial.println("uT");
+   */
+    delay(500); 
 }
 
 
