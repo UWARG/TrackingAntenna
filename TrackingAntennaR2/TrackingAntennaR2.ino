@@ -1,12 +1,16 @@
 /*
+
  This sketch connects to a a telnet server (http://www.google.com)
  using an Arduino Wiznet Ethernet shield.  You'll need a telnet server 
  to test this with.
+ 
  Circuit:
  * Ethernet shield attached to pins 10, 11, 12, 13
  
   servoPan is the pan servo, pwm to pin 5 (xy) .
   servoTilt is the tilt servo, pwm6 (z).
+
+  
 Servo Information: 
 Model No. HITEC HS-785HB
     
@@ -159,8 +163,8 @@ int currentTheta = 50;
 //Hypoteneuse of x,y coordinates
 double Hyp = 0;
 
-unsigned long servoPanLastWrite = 0;
-unsigned long servoTiltLastWrite = 0;
+//unsigned long servoPanLastWrite = 0;
+//unsigned long servoTiltLastWrite = 0;
 
 
 // ---------------------------------FOR GPS CALCULATION FUNCTIONS --------------------------------------
@@ -417,4 +421,3 @@ void loop()
   }
   
 }
-//
