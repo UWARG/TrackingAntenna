@@ -3,14 +3,14 @@
  This sketch connects to a a telnet server (http://www.google.com)
  using an Arduino Wiznet Ethernet shield.  You'll need a telnet server 
  to test this with.
- 
+
  Circuit:
  * Ethernet shield attached to pins 10, 11, 12, 13
  
   servoPan is the pan servo, pwm to pin 5 (xy) .
   servoTilt is the tilt servo, pwm6 (z).
 
-  
+
 Servo Information: 
 Model No. HITEC HS-785HB
     
@@ -59,7 +59,7 @@ Model No. ST LSM303DLHC
 #define INITIAL_LATTITUDE 0
 #define INITIAL_LONGITUDE 0
 #define INITIAL_ALTITUDE  0
-    
+
 // Enter a MAC address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
@@ -84,7 +84,7 @@ EthernetClient client;
 
 //Servo Objects
 Servo servoPan;  // create servo object to control a servo 
-Servo servoTilt;  // create servo object to control a servo
+Servo servoTilt;  // create servo object to control a servo 
 
 //Initializes the compass library with an arbitrarily set compass id
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID); //Create compass object to read from compass
@@ -421,3 +421,6 @@ void loop()
   }
   
 }
+
+
+
