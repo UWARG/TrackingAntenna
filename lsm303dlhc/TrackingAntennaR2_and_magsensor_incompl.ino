@@ -21,29 +21,17 @@ Model No. HITEC HS-785HB
     
     Center = PWM 1500 -> angle 630
     1 degree = PWM 1.429
-
-Magnetometer(Compass) Information:
-Model No. ST LSM303DLHC
-  
-    Information taken from: https://www.adafruit.com/products/1120
-  
-    Communication between compass and board is over i2c.
-    All readings are in micro-Teslas
-    Compass attached to pins: SCL, SDA, 5V, GND
-  
-    Note: Compass points to magnetic north, not true north
-  
+    
  */
  
 #include <SPI.h>
 #include <Ethernet.h>
 #include <math.h>
-#include <Servo.h>
-#include <Wire.h>
+#include <Servo.h> 
 
-//Adafruit Libraries
+#include <Wire.h>
 #include <Adafruit_Sensor.h>
-#include <Adafruit_LSM303_U.h> 
+#include <Adafruit_LSM303_U.h>
 
 #define M_PI 3.14159265358979323
 #define SERVO_MIDPOINT 1500
@@ -51,15 +39,13 @@ Model No. ST LSM303DLHC
 #define DEGREE_TO_PWM 0.7
 #define GEAR_RATIO_YZ 7  //how much it is geared down by
 #define GEAR_RATIO_XY 1
-#define COMPASS_ID 12345
-#define GRAVITY_CONSTANT 9.80665
 
 /****           INITIALIZATION VALUES       *************/
 
 #define INITIAL_LATTITUDE 0
 #define INITIAL_LONGITUDE 0
 #define INITIAL_ALTITUDE  0
-
+		
 // Enter a MAC address for your controller below.
 // The IP address will be dependent on your local network:
 byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
@@ -86,8 +72,8 @@ EthernetClient client;
 Servo servoPan;  // create servo object to control a servo 
 Servo servoTilt;  // create servo object to control a servo 
 
-//Initializes the compass library with an arbitrarily set compass id
-Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID); //Create compass object to read from compass
+/* Assign a unique ID to the magnetometer at the same time */
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(12345);
 
 void setup() {
   // attaches the servos
@@ -116,12 +102,21 @@ void setup() {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
-  
-  //Initialize the compass
-  if(!mag.begin()){
-    Serial.println("\nCompass failed to be detected.");
-  }
 
+  // magnetometer setup
+  /* Enable auto-gain */
+  mag.enableAutoRange(true);
+  
+  /* Initialise the sensor */
+  if(!mag.begin())
+  {
+    /* There was a problem detecting the LSM303 ... check your connections */
+    Serial.println("Ooops, no LSM303 detected ... Check your wiring!");
+    while(1);
+  }
+  /* Display some basic information on this sensor */
+ // displaySensorDetails();
+ 
 }
 
 
@@ -244,29 +239,7 @@ void SetTilt(int ThetaYZ)
   //}   
 }
 
-//--------------------------------------------------------Compass Functions---------------------------------------------------------------
 
-/* TODO FOR COMPASS TEAM:
-  1. Using accelerometer, calculate angle between orientation and gravity vector to find angle of incline (inclinmeter)
-  2. Move servos until completely flat(or close enough)
-  3. Get readings for magnetic north
-  4. Use north readings to get compensation for later readings using dot product of north and reading 
-*/
-
-//Calculates the horizontal(X-Y) direction the antenna is pointing in degrees but only if antenna is flat
-float GetCompassXY(){
-  float heading = (atan2(compEvent.magnetic.y, compEvent.magnetic.x)*180)/ M_PI;
-  
-  if(heading < 0){
-    heading = heading + 360;  //convert to value between 0 - 360 degrees
-  }
-  return heading;
-}
-
-/*void getUnitVector (float & x1, float & x2, float & x3)
-{
-  float mag = sqrt(x1*x1 +)
-}*/
 
 
 //-------------------------------------MAIN------------------------------------------------------
@@ -421,7 +394,22 @@ void loop()
     while(true);
   }
   
+   
+    /* Get a new magnetometer event */ 
+    sensors_event_t event; 
+    mag.getEvent(&event);
+  
+   double az = atan2(event.magnetic.y, event.magnetic.x) *180/PI +180 ;
+   
+    Serial.print("Az: "); Serial.print(az); Serial.println("  ");
+    //Display the results (magnetic vector values are in micro-Tesla (uT)) 
+   /*
+   Serial.print("X: "); Serial.print(event.magnetic.x); Serial.print("  ");
+    Serial.print("Y: "); Serial.print(event.magnetic.y); Serial.print("  ");
+    Serial.print("Z: "); Serial.print(event.magnetic.z); Serial.print("  ");Serial.println("uT");
+   */
+    delay(500); 
 }
-//
+
 
 
