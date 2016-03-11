@@ -87,17 +87,33 @@ Servo servoPan;  // create servo object to control a servo
 Servo servoTilt;  // create servo object to control a servo 
 
 //Initializes the compass library with an arbitrarily set compass id
-Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID); //Create compass object to read from compass
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID); //Create compass object to read magnetic values
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID); //Create compass object to read acceleration values
 
 void setup() {
   // attaches the servos
   //usage: servo.attach(pin, minPWM, maxPWM)
   servoPan.attach(5, 600, 2400);
   servoTilt.attach(6, 600, 2400);
+    
+   /* Enable auto-gain */
+  mag.enableAutoRange(true);
+  
+  //Initialize the compass
+  if(!mag.begin()){
+    Serial.println("\nCompass failed to be detected.");
+  }
+  //Initialize the accelerometer
+  if(!accel.begin()){
+    Serial.println("\nAccelerometer failed to be detected.");
+  }
+
+  //Prints accelerometer data repeatedly so that antenna may be aligned vertically
+  VerticalAlignLoop();
   
   // start the Ethernet connection:
   Ethernet.begin(mac,ip);
- // Open serial communications and wait for port to open:
+  // Open serial communications and wait for port to open:
   Serial.begin(9600);
    while (!Serial) {
     ; // wait for serial port to connect. Needed for Leonardo only
@@ -116,12 +132,6 @@ void setup() {
     // if you didn't get a connection to the server:
     Serial.println("connection failed");
   }
-  
-  //Initialize the compass
-  if(!mag.begin()){
-    Serial.println("\nCompass failed to be detected.");
-  }
-
 }
 
 
@@ -132,7 +142,7 @@ int commaCnt = 0;
 int lineCnt = 0;
 
 //string of data
-String Data = "";
+String Data = ""; //move these and the boolean L1 and L2 variables into the function loop
 String Column = "";
 const char *buff = Column.c_str(); //was const char
 
@@ -152,9 +162,9 @@ double lon = 0;
 double altitude = 0;
 
 //want to change all these to precompiler directives...
-double olat = 0; 
-double olong = 0;
-double oaltitude = 0;
+double olat = INITIAL_LATTITUDE; 
+double olong = INITIAL_LONGITUDE;
+double oaltitude = INITIAL_ALTITUDE;
 
 //Angles
 int ThetaXY = 0;
@@ -176,7 +186,7 @@ void getXYCoordinates(double longitude, double latitude){
     xCoord = getDistance(olat, olong, olat, longitude);//Longitude relative to (0,0)
     yCoord = getDistance(olat, olong, latitude, olong);
     Hyp = getDistance(olat, olong, latitude, longitude);
-    //Hyp = sqrt(sq(xCoord) + sq(yCoord)); //set the hypoteneuse to calculate the angle needed to tilt up/down
+    //Hyp = sqrt(sq(xCoord) + sq(yCoord)); //set the hypoteneuse to calculate the angle needed to tilt up/down (should this be "to pan"?)
 }
 
 float getDistance(double lat1, double lon1, double lat2, double lon2){ //in meters
@@ -253,21 +263,51 @@ void SetTilt(int ThetaYZ)
   4. Use north readings to get compensation for later readings using dot product of north and reading 
 */
 
-//Calculates the horizontal(X-Y) direction the antenna is pointing in degrees but only if antenna is flat
-float GetCompassXY(){
-  float heading = (atan2(compEvent.magnetic.y, compEvent.magnetic.x)*180)/ M_PI;
+//Declares sensor variable "accelEvent"
+sensors_event_t accelEvent;
   
-  if(heading < 0){
-    heading = heading + 360;  //convert to value between 0 - 360 degrees
-  }
-  return heading;
+//Function loop for physical antenna setup, using accelerometer data
+void VerticalAlignLoop()
+{
+  //Vertically aligned when y and z components are approzimately zero
+  while(accelEvent.acceleration.y < 0.35 | accelEvent.acceleration.z < 0.35)
+    {
+    accel.getEvent(&accelEvent);
+
+    //Prints out raw data for test setup
+    Serial.print("X Acceleration: "); Serial.print(accelEvent.acceleration.x); Serial.println(" m/s^2 ");
+    Serial.print("Y Acceleration: "); Serial.print(accelEvent.acceleration.y); Serial.println(" m/s^2 ");
+    Serial.print("Z Acceleration: "); Serial.print(accelEvent.acceleration.z); Serial.println(" m/s^2 ");
+    delay(1000);
+    }
 }
 
-/*void getUnitVector (float & x1, float & x2, float & x3)
-{
-  float mag = sqrt(x1*x1 +)
-}*/
+//Declare sensor variable "magEvent"
+sensors_event_t magEvent;
+float declination;
 
+//Calculates the horizontal (Y-Z) direction the antenna is pointing in degrees, relative to true north
+//Mount sensor on back of vertical, rotating antenna post with X-axis vertical
+//Clockwise (E) is positive
+float GetCompassYZ()
+{
+  //Retrieve magnetic sensor output
+  mag.getEvent(&magEvent);
+  
+  //Calculate antenna heading counter clockwise (W) in degrees, relative to magnetic north
+  float headingMag = (atan2(-magEvent.magnetic.y, -magEvent.magnetic.z)*180)/ M_PI;
+
+  //Calculate true north using declination
+  //Declination values: South Port Manitoba on 04/30/2016 = 4.136deg E, Waterloo Ontario on 03/09/2016 = 9.633deg W)
+  declination = -9.633;
+  float headingTrue = headingMag + declination;
+  
+  if(headingTrue < 0){
+    headingTrue = headingTrue + 360;  //convert to value between 0 - 360 degrees
+  }
+  //Return antenna heading, relative to true north
+  return headingTrue;
+}
 
 //-------------------------------------MAIN------------------------------------------------------
 
@@ -423,5 +463,4 @@ void loop()
   
 }
 //
-
 
