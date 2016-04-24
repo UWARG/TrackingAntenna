@@ -69,7 +69,8 @@ Model No. ST LSM303DLHC
 #define SERVO_MIDPOINT 1500
 #define SERVO_INITIALIZE 0              //Used to set servo motors to their mid point
 #define EARTH_RADIUS 6371000            //in m
-#define DEGREE_TO_PWM 0.63868           //Conversion factor of degrees to PWM                                                         MAY BE DIFFERENT FOR EACH SERVO, CHECK TO MAKE SURE
+//#define DEGREE_TO_PWM 0.63868           //Conversion factor of degrees to PWM - No Longer Valid For Installed Motors
+#define DEGREE_TO_PWM 0.69444           //Conversion factor of degrees to PWM - Current Pan Motor
 #define GEAR_RATIO_XZ 7                 //Gear ratio used to reduce angular range in which motor operates
 #define GEAR_RATIO_XY 1
 #define COMPASS_ID 12345
@@ -77,11 +78,10 @@ Model No. ST LSM303DLHC
 #define SS 53                           //Choose SPI slave-select pin
 #define Size 3                          //Size of square matrices and length of vectors
 #define DEBUG false                     //When "true" turns on the printing to serial for testing
-#define InitializeAntenna = false;        //Used to control for loop for locating antenna's GPS coordinates                 DO NOT USE UNLESS SPI CONNECTION IS WORKING PROPERLY
 
 //Manual calibration booleans and offsets
-#define NorthCalibrate true             //Indicates when north direction must be manually set ("true" if setting manually, "false" if compass is automating process)
-#define SouthCalibrate true             //Indicates when compass is calibrated improperly, use manually input south angle to calibrate ("true" if setting manually, "false" if compass is properly calibrated)
+#define NorthCalibrate false             //Indicates when north direction must be manually set ("true" if setting manually, "false" if compass is automating process)
+#define SouthCalibrate false             //Indicates when compass is calibrated improperly, use manually input south angle to calibrate ("true" if setting manually, "false" if compass is properly calibrated)
 #define NorthOffset 7                   //Added to "HeadingTrue" to point compass at true north, if calibration isn't working properly (if compass is reading North as West of True North, then NorthOffset > 0)
 #define TrueSouth 180                   //Angle given by compass when pointing to True South, if calibration isn't working properly (TrueSouth reading taken should be colinear with NorthOffset reading)
 
@@ -111,6 +111,7 @@ int altitudeCnt = 0;
 
 //Used to denote header line during parsing of plane's GPS data
 boolean L1 = true;                        //Line 1 marker, use comman count to assign commaCnt values to pertinent headings
+boolean InitializeAntenna = true;         //Used to control for loop for locating antenna's GPS coordinates                 DO NOT USE UNLESS SPI CONNECTION IS WORKING PROPERLY
 
 //Angles
 int ThetaPanRef = 0;      //Pan reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
@@ -157,10 +158,6 @@ sensors_event_t magEvent;       //Magnetic Compass Data
 //East declinations are POSITIVE, West declinations are NEGATIVE
 float declination = -9.624;
 
-//Manual calibration offsets
-float NorthOffset = ;           //Added to "HeadingTrue" to point compass at true north, if calibration isn't working properly (if compass is reading North as West of True North, then NorthOffset > 0)
-float TrueSouth = ;             //Angle given by compass when pointing to True South, if calibration isn't working properly (TrueSouth reading taken should be colinear with NorthOffset reading)
-
 //Declare vectors for sensor calculations
 //float Gravity[Size];
 float NegGravity[Size];           //Vertical direction (negative of gravity)
@@ -175,78 +172,8 @@ float ChangeBasis[Size][Size];
 //Change of basis matrix for converting vectors from inertial frame of reference to compass frame of reference
 //Multiply inertial frame of reference vector on left
 float RevertBasis[Size][Size];
-
-//-----------------------------------INITIALIZATION VALUES----------------------------
-
-// Enter a MAC address for your controller below.
-// The IP address will be dependent on your local network:
-byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
-IPAddress ip(192,168,1,199); //this is for the arduino
-
-
-// Enter the IP address of the server you're connecting to:
-IPAddress server(192,168,1,104);  //pi or computer that is hosting the data
-
-/****        END OF INITIALIZATION      **********/
-
-// Initialize the Ethernet client library
-// with the IP address and port of the server 
-// that you want to connect to (port 23 is default for telnet;
-// if you're using Processing's ChatServer, use  port 10002):
-EthernetClient client;
-
-//Servo Objects
-Servo servoPan;   // create servo object to control a servo 
-Servo servoTilt;  // create servo object to control a servo 
-
-//Initializes the compass library with an arbitrarily set compass id
-Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);          //Create compass object to read magnetic values
-Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID);    //Create compass object to read acceleration values
-
-void setup(){  
-  //Attaches the servos
-  //usage: servo.attach(pin, minPWM, maxPWM)
-  servoPan.attach(5, 600, 2400);
-  servoTilt.attach(6, 600, 2400);
-    
-   /* Enable auto-gain */
-  mag.enableAutoRange(true);
-  
-  //Initialize the compass
-  if(!mag.begin()){
-    Serial.println("\nCompass failed to be detected.");
-  }
-  //Initialize the accelerometer
-  if(!accel.begin()){
-    Serial.println("\nAccelerometer failed to be detected.");
-  }
-
-  // start the Ethernet connection:
-  Ethernet.begin(mac,ip);
-  
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-   while (!Serial) {
-     // wait for serial port to connect. Needed for Leonardo only
-  }
-
-  // give the Ethernet shield a second to initialize:
-  delay(1000);
-  Serial.println("connecting...");
-
-  // if you get a connection, report back via serial:
-  if (client.connect(server, 1234)) {
-    Serial.println("connected");
-  }
-  else {  // if you didn't get a connection to the server:
-    Serial.println("connection failed");
-  }
-
-//  //Initialize SPI connection and retrieve antenna coordinates                                                    DO NOT USE UNTIL SPI CONNECTION IS WORKING
-//  pinMode(SS, OUTPUT);  //Declare slave-select pin
-//  SPI.begin();
-//  SPI.setBitOrder(MSBFIRST);  //Sets bit order for data transfer, determined by microprocessor
-}
+float SoftIronTransform[Size][Size];
+float BiasVec[Size];
 
 //--------------------------------------------------------Matrix Functions---------------------------------------------------------------
 
@@ -373,25 +300,127 @@ void Normalize(float *pVec, int VecSize, float *pNorm){
   }
 }
 
+//-----------------------------------INITIALIZATION VALUES----------------------------
+
+// Enter a MAC address for your controller below.
+// The IP address will be dependent on your local network:
+byte mac[] = {0x90,0xA2,0xDA,0x0F,0x2C,0x9A};
+IPAddress ip(192,168,1,199); //this is for the arduino
+
+// Enter the IP address of the server you're connecting to:
+IPAddress server(192,168,1,101);  //pi or computer that is hosting the data
+
+/****        END OF INITIALIZATION      **********/
+
+// Initialize the Ethernet client library
+// with the IP address and port of the server 
+// that you want to connect to (port 23 is default for telnet;
+// if you're using Processing's ChatServer, use  port 10002):
+EthernetClient client;
+
+//Servo Objects
+Servo servoPan;   // create servo object to control a servo 
+Servo servoTilt;  // create servo object to control a servo 
+
+//Initializes the compass library with an arbitrarily set compass id
+Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);          //Create compass object to read magnetic values
+Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID);    //Create compass object to read acceleration values
+
+void setup(){  
+  //Attaches the servos
+  //usage: servo.attach(pin, minPWM, maxPWM)
+  servoPan.attach(5, 600, 2400);
+  servoTilt.attach(6, 600, 2400);
+    
+   /* Enable auto-gain */
+  mag.enableAutoRange(true);
+  
+  //Initialize the compass
+  if(!mag.begin()){
+    Serial.println("\nCompass failed to be detected.");
+  }
+  //Initialize the accelerometer
+  if(!accel.begin()){
+    Serial.println("\nAccelerometer failed to be detected.");
+  }
+
+  // start the Ethernet connection:
+  Ethernet.begin(mac,ip);
+  client.connect(server, 1234)
+  
+  // Open serial communications and wait for port to open:
+  Serial.begin(9600);
+   while (!Serial) {
+     // wait for serial port to connect. Needed for Leonardo only
+  }
+
+  // give the Ethernet shield a second to initialize:
+  delay(1000);
+  Serial.println("connecting...");
+
+  // if you get a connection, report back via serial:
+  if (client.connect()) {
+    Serial.println("connected");
+  }
+  else {  // if you didn't get a connection to the server:
+    Serial.println("connection failed");
+    if(client.connect() = -1){
+      Serial.println("connection timed out");
+    }
+    else if((client.connect() = -2){
+      Serial.println("invalid server");
+    }
+    else if((client.connect() = -3){
+      Serial.println("truncated");
+    }
+    else if((client.connect() = -2){
+      Serial.println("invalid response");
+    }
+  }
+
+//  //Initialize SPI connection and retrieve antenna coordinates                                                    DO NOT USE UNTIL SPI CONNECTION IS WORKING
+//  pinMode(SS, OUTPUT);  //Declare slave-select pin
+//  SPI.begin();
+//  SPI.setBitOrder(MSBFIRST);  //Sets bit order for data transfer, determined by microprocessor
+
+  //Set up soft iron matrix and bias vector for calibration of magnetometer data
+  //Define soft iron transform matrix
+  SoftIronTransform[0][0] = 1.0717;
+  SoftIronTransform[0][1] = -0.0171;
+  SoftIronTransform[0][2] = -0.0112;
+  SoftIronTransform[1][0] = -0.0171;
+  SoftIronTransform[1][1] = 1.0714;
+  SoftIronTransform[1][2] = 0.0029;
+  SoftIronTransform[2][0] = -0.0112;
+  SoftIronTransform[2][1] = 0.0029;
+  SoftIronTransform[2][2] = 1.0554;       //Seems to be some discrepancy in the Y direction with these numbers (X and Z are good)
+  Matrix.Invert((float*)SoftIronTransform, 3);
+  
+  //Define bias vector
+  BiasVec[0] = 9.6778;
+  BiasVec[1] = 2.1963;
+  BiasVec[2] = 3.4728;
+}
+
 // ---------------------------------GPS FUNCTIONS--------------------------------------
 
-//Initialize antenna location using on board GPS                                                                      DOES NOT WORK YET
-//Uses GPS data incoming through SPI connection to locate antenna, used as reference for plane coordinates (origin)
-void LocateAntenna(){  
-  int i, j;
-  for(i = 0; i < 3; i++){
-    char *pGPSData = (char *)(&InDATA);                                                   //MAY BE DIFFICULT TO USE SIZEOF TO SET
-    uint16_t *pGPSData = (uint16_t*)(&InDATA);                                            //MAY NEED TO ADD LIBRARY, BUT MAY BE DIFFICULT TO USE SIZEOF TO SET FOR LOOP
-    digitalWrite(SS, LOW);                                                                //INPUT (SDI) CONNECTS TO OUTPUT ON THE ARDUINO
-    for (j = 0; j < sizeof(GPSData); j += 2, pGPSData++){                                 //USE SIZEOF
-      *(pGPSData+i) = SPI.transfer16(OutDATA);                                            //THIS ALLOWS ME TO INCREMENT ONLY i IN THE FOR LOOP
-      *(&InDATA+i) = SPI.transfer16(OutDATA);                                             //JUMPS OVER STRUCT, +i CAUSES INCREMENT OF SIZE OF STRUCT WHEN WRITTEN THIS WAY
-      *(pGPSData) = SPI.transfer16(OutDATA);
-    }
-    digitalWrite(SS, HIGH);
-    delay(1000);
-  }
-}
+////Initialize antenna location using on board GPS                                                                      DOES NOT WORK YET
+////Uses GPS data incoming through SPI connection to locate antenna, used as reference for plane coordinates (origin)
+//void LocateAntenna(){  
+//  int i, j;
+//  for(i = 0; i < 3; i++){
+//    char *pGPSData = (char *)(&InDATA);                                                   //MAY BE DIFFICULT TO USE SIZEOF TO SET
+//    uint16_t *pGPSData = (uint16_t*)(&InDATA);                                            //MAY NEED TO ADD LIBRARY, BUT MAY BE DIFFICULT TO USE SIZEOF TO SET FOR LOOP
+//    digitalWrite(SS, LOW);                                                                //INPUT (SDI) CONNECTS TO OUTPUT ON THE ARDUINO
+//    for (j = 0; j < sizeof(GPSData); j += 2, pGPSData++){                                 //USE SIZEOF
+//      *(pGPSData+i) = SPI.transfer16(OutDATA);                                            //THIS ALLOWS ME TO INCREMENT ONLY i IN THE FOR LOOP
+//      *(&InDATA+i) = SPI.transfer16(OutDATA);                                             //JUMPS OVER STRUCT, +i CAUSES INCREMENT OF SIZE OF STRUCT WHEN WRITTEN THIS WAY
+//      *(pGPSData) = SPI.transfer16(OutDATA);
+//    }
+//    digitalWrite(SS, HIGH);
+//    delay(1000);
+//  }
+//}
 
 //Calculates distance between two points (latitude and longitude), in meters
 long double getDistance(long double Lat1, long double Lon1, long double Lat2, long double Lon2){ 
@@ -495,15 +524,25 @@ void SetTilt(int Theta){
 //--------------------------------------------------------Compass Functions---------------------------------------------------------------
 
 //Create magnetic north and acceleration vectors
-void GetVectorData(long double *pMagNorthComp, long double *pNegGravity){
+//void GetVectorData(long double *pMagNorthComp, long double *pNegGravity){
+void GetVectorData(float *pBiasVec, float *pSoftIronTransform, float *pMagNorthComp, float *pNegGravity){
+  float RawMinusBias[Size];
   //Create magnetic north vector
   mag.getEvent(&magEvent);
 
-  //Assign and calibrate magnetic data
-  pMagNorthComp[0] = (magEvent.acceleration.x - MinMag_X) / (MaxMag_X - MinMag_X) * 2 - 1;
-  pMagNorthComp[1] = (magEvent.acceleration.y - MinMag_Y) / (MaxMag_Y - MinMag_Y) * 2 - 1;
-  pMagNorthComp[2] = (magEvent.acceleration.z - MinMag_Z) / (MaxMag_Z - MinMag_Z) * 2 - 1;
+//  //Assign and calibrate magnetic data
+//  pMagNorthComp[0] = (magEvent.acceleration.x - MinMag_X) / (MaxMag_X - MinMag_X) * 2 - 1;
+//  pMagNorthComp[1] = (magEvent.acceleration.y - MinMag_Y) / (MaxMag_Y - MinMag_Y) * 2 - 1;
+//  pMagNorthComp[2] = (magEvent.acceleration.z - MinMag_Z) / (MaxMag_Z - MinMag_Z) * 2 - 1;
   
+  //Assign and calibrate magnetic data
+  pMagNorthComp[0] = magEvent.magnetic.x;
+  pMagNorthComp[1] = magEvent.magnetic.y;
+  pMagNorthComp[2] = magEvent.magnetic.z;
+
+  Matrix.Subtract((float*)pMagNorthComp, (float*)pBiasVec, 3, 1, (float*)RawMinusBias);
+  Matrix.Multiply((float*)pSoftIronTransform, (float*)RawMinusBias, 3, 3, 1, (float*)pMagNorthComp);  
+
   //Create gravity vector
 //  long double Gravity[Size];
   accel.getEvent(&accelEvent);
@@ -640,27 +679,27 @@ float AntennaHeadingTrue(float *pChangeBasis, float *pUnitInertX, float *pHeadin
   //Calibrate compass so that it reads North and South as colinear
   //Take reading after setting NorthOffset
   if(SouthCalibrate){
-    float SouthRatio = 360 - ((180 * 180) / abs(TrueSouth));
+    float SouthRatio = 360 - ((180.0 * 180.0) / abs(TrueSouth));
     if(TrueSouth < 0){
       if(HeadingTrue < TrueSouth){
-        HeadingTrue = HeadingTrue * (180 / abs(TrueSouth)) + 360;
+        HeadingTrue = HeadingTrue * (180.0 / abs(TrueSouth)) + 360;
       }
       else if(HeadingTrue > 0){
-        HeadingTrue = HeadingTrue * (SouthRatio / 180);
+        HeadingTrue = HeadingTrue * (SouthRatio / 180.0);
       }
       else{
-        HeadingTrue = HeadingTrue * (180 / abs(TrueSouth));
+        HeadingTrue = HeadingTrue * (180.0 / abs(TrueSouth));
       }
     }
     if(TrueSouth > 0){
       if(HeadingTrue > TrueSouth){
-        HeadingTrue = HeadingTrue * (180 / abs(TrueSouth)) - 360;
+        HeadingTrue = HeadingTrue * (180.0 / abs(TrueSouth)) - 360;
       }
       else if(HeadingTrue < 0){
-        HeadingTrue = HeadingTrue * (SouthRatio / 180);
+        HeadingTrue = HeadingTrue * (SouthRatio / 180.0);
       }
       else{
-        HeadingTrue = HeadingTrue * (180 / abs(TrueSouth));
+        HeadingTrue = HeadingTrue * (180.0 / abs(TrueSouth));
       }
     }
   }
@@ -777,7 +816,7 @@ void loop(){
     
       if (L1 == false){
         //Retrieves sensor (compass and accelerometer) data
-        GetVectorData((long double*)MagNorthComp, (long double*)NegGravity);
+        GetVectorData((float*)MagNorthComp, (float*)NegGravity);
         //Defines an inertial frame of reference using the magnetic north vector read from the compass
         DefineInertAxes((float*)MagNorthComp, (float*)NegGravity, (float*)UnitInertX, (float*)UnitInertY, (float*)UnitInertZ);
         //Defines a change of basis matrix used to convert the magnetic north vector from the compass coordinate system to the inertial frame of reference
