@@ -69,15 +69,19 @@ Model No. ST LSM303DLHC
 #define SERVO_MIDPOINT 1500
 #define SERVO_INITIALIZE 0              //Used to set servo motors to their mid point
 #define EARTH_RADIUS 6371000            //in m
-//#define DEGREE_TO_PWM 0.63868           //Conversion factor of degrees to PWM - No Longer Valid For Installed Motors
-#define DEGREE_TO_PWM 0.69444           //Conversion factor of degrees to PWM - Current Pan Motor
+#define DEGREE_TO_PWM 0.6725            //Conversion factor of degrees to PWM
 #define GEAR_RATIO_XZ 7                 //Gear ratio used to reduce angular range in which motor operates
 #define GEAR_RATIO_XY 1
 #define COMPASS_ID 12345
 #define GRAVITY_CONSTANT 9.80665
-#define SS 53                           //Choose SPI slave-select pin
 #define Size 3                          //Size of square matrices and length of vectors
 #define DEBUG false                     //When "true" turns on the printing to serial for testing
+
+//Define GPS coordinates of antenna at competition (reference), use GPS app on phone while on site to locate
+//#define latORG 0                        //Manually enter South Port Latitude
+//#define lonORG 0                        //Manually enter South Port Longitude
+#define latORG 43.5311386               //Latitude of antenna at Flying Dutchmen flight center
+#define lonORG -80.5771163              //Longitude of antenna at Flying Dutchmen flight center
 
 //Manual calibration booleans and offsets
 //If NorthCalibrate = true, it must be calibrated first, then "TrueSouth" value can be read colinear with calibrated True North
@@ -124,60 +128,37 @@ String Column = "";
 const char *buff = Column.c_str(); //Uses pointer "buff" to continuously assign new data to a string in Column
 
 //Angles
-int ThetaPanRef = 0;      //Pan reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
-int ThetaTiltRef = 0;     //Tilt reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
-int ThetaPan = 0;         //Difference in pan angle between current position of plane and mid-point angle of servo
-int ThetaTilt = 0;        //Difference in tilt angle between current position of plane and mid-point angle of servo
-int LastThetaPan;         //Records the last pan input angle for determining whether compass crosses south axis
+int ThetaPanRef = 0;                //Pan reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
+int ThetaTiltRef = 0;               //Tilt reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
+int ThetaPan = 0;                   //Difference in pan angle between current position of plane and mid-point angle of servo
+int ThetaTilt = 0;                  //Difference in tilt angle between current position of plane and mid-point angle of servo
+int LastThetaPan;                   //Records the last pan input angle for determining whether compass crosses south axis
 
 unsigned long servoPanLastWrite = 0;
 unsigned long servoTiltLastWrite = 0;
-
-/***      GPS     ***/
-typedef struct _GPSData {
-    long double latitude;
-    long double longitude;
-    float Gtime;
-    float Gspeed;            //4 Bytes
-    int altitude;
-    int heading;             //2 Bytes
-    char satellites;
-    char positionFix;        //1 Byte
-} GPSData;
-
-int OutDATA = 0;             //Data to be sent to GPS board over SPI connection
-GPSData InDATA;              //GPSData is a struct, InDATA is used to store antenna coordinate info (latORG, lonORG and altORG)
 
 //Latitude, Longitude and Altitude variables
 long double lat = 0;                //GPS latitude of plane
 long double lon = 0;                //GPS longitude of plane
 long double altitude = 0;           //GPS altitude of plane
-//long double latORG = 0;             //GPS latitude of antenna (reference)
-//long double lonORG = 0;             //GPS longitude of antenna (reference)
-//long double altORG = 0;             //GPS altitude of antenna (reference)
-long double latORG = 43.5311386;     //GPS latitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
-long double lonORG = -80.5771163;    //GPS longitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
-//GPS coordinates of antenna at competition (reference), use GPS app on phone while on site to locate
-long double latORG = SouthPortLat;
-long double lonORG = SouthPortLon;
 
 /***      COMPASS & ACCELEROMETER     ***/
 //Declare sensor variables
-sensors_event_t accelEvent;     //Accelerometer Data
-sensors_event_t magEvent;       //Magnetic Compass Data
+sensors_event_t accelEvent;         //Accelerometer Data
+sensors_event_t magEvent;           //Magnetic Compass Data
 
-//Declination values: South Port Manitoba on 04/30/2016 = 4.136deg E, Waterloo Ontario on 03/09/2016 = 9.633deg W, Flying Dutchmen flight center on 04/10/2016 = -9.624 W
+//Declination values: South Port Manitoba on 04/30/2016 = 4.136 deg E, Waterloo Ontario on 03/09/2016 = 9.633deg W, Flying Dutchmen flight center on 04/10/2016 = -9.624 W
 //East declinations are POSITIVE, West declinations are NEGATIVE
 float declination = -9.624;
 
 //Declare vectors for sensor calculations
 //float Gravity[Size];
-float NegGravity[Size];           //Vertical direction (negative of gravity)
-float MagNorthComp[Size];         //Magnetic north in compass frame of reference
-float HeadingAnt[Size];           //Heading of antenna in horizontal plane of inertial frame of reference, colinear with x-axis of compass projected into horizontal inertial plane
-float UnitInertX[Size];           //X-Axis in inertial frame of reference
-float UnitInertY[Size];           //Y-Axis in inertial frame of reference
-float UnitInertZ[Size];           //Z-Axis in inertial frame of reference
+float NegGravity[Size];            //Vertical direction (negative of gravity)
+float MagNorthComp[Size];           //Magnetic north in compass frame of reference
+float HeadingAnt[Size];             //Heading of antenna in horizontal plane of inertial frame of reference, colinear with x-axis of compass projected into horizontal inertial plane
+float UnitInertX[Size];             //X-Axis in inertial frame of reference
+float UnitInertY[Size];             //Y-Axis in inertial frame of reference
+float UnitInertZ[Size];             //Z-Axis in inertial frame of reference
 //Change of basis matrix for converting vectors from compass frame of reference to inertial frame of reference
 //Multiply compass frame of reference vector on left
 float ChangeBasis[Size][Size];
@@ -411,24 +392,6 @@ void setup(){
 }
 
 // ---------------------------------GPS FUNCTIONS--------------------------------------
-
-////Initialize antenna location using on board GPS                                                                      DOES NOT WORK YET
-////Uses GPS data incoming through SPI connection to locate antenna, used as reference for plane coordinates (origin)
-//void LocateAntenna(){  
-//  int i, j;
-//  for(i = 0; i < 3; i++){
-//    char *pGPSData = (char *)(&InDATA);                                                   //MAY BE DIFFICULT TO USE SIZEOF TO SET
-////    uint16_t *pGPSData = (uint16_t*)(&InDATA);                                            //MAY NEED TO ADD LIBRARY, BUT MAY BE DIFFICULT TO USE SIZEOF TO SET FOR LOOP
-//    digitalWrite(SS, LOW);                                                                //INPUT (SDI) CONNECTS TO OUTPUT ON THE ARDUINO
-//    for (j = 0; j < sizeof(GPSData); j += 2, pGPSData++){                                 //USE SIZEOF
-//      *(pGPSData+i) = SPI.transfer16(OutDATA);                                            //THIS ALLOWS ME TO INCREMENT ONLY i IN THE FOR LOOP
-////      *(&InDATA+i) = SPI.transfer16(OutDATA);                                             //JUMPS OVER STRUCT, +i CAUSES INCREMENT OF SIZE OF STRUCT WHEN WRITTEN THIS WAY
-////      *(pGPSData) = SPI.transfer16(OutDATA);
-//    }
-//    digitalWrite(SS, HIGH);
-//    delay(1000);
-//  }
-//}
 
 //Calculates distance between two points (latitude and longitude), in meters
 long double getDistance(long double Lat1, long double Lon1, long double Lat2, long double Lon2){ 
@@ -756,12 +719,6 @@ void loop(){
       //Sets reference angle for servo tilt motors, used to locate angular position of motor's midpoint in relation to the horizontal plane
       ThetaTiltRef = SetTiltOffset((float*) UnitInertX, (float*)UnitInertY);
   
-      //Calculate antenna location using GPS coordinates
-      LocateAntenna();
-      long double latORG = InDATA.latitude;    //Sets GPS latitude of antenna (reference)
-      long double lonORG = InDATA.longitude;   //Sets GPS longitude of antenna (reference)
-      long double altORG = InDATA.altitude;    //Sets GPS altitude of antenna (reference), not needed if ground station altitude takes ground level altitude into account
-      
       InitializeAntenna = false;
     }
 
