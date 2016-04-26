@@ -80,38 +80,48 @@ Model No. ST LSM303DLHC
 #define DEBUG false                     //When "true" turns on the printing to serial for testing
 
 //Manual calibration booleans and offsets
-#define NorthCalibrate false             //Indicates when north direction must be manually set ("true" if setting manually, "false" if compass is automating process)
-#define SouthCalibrate false             //Indicates when compass is calibrated improperly, use manually input south angle to calibrate ("true" if setting manually, "false" if compass is properly calibrated)
-#define NorthOffset 7                   //Added to "HeadingTrue" to point compass at true north, if calibration isn't working properly (if compass is reading North as West of True North, then NorthOffset > 0)
-#define TrueSouth 180                   //Angle given by compass when pointing to True South, if calibration isn't working properly (TrueSouth reading taken should be colinear with NorthOffset reading)
+//If NorthCalibrate = true, it must be calibrated first, then "TrueSouth" value can be read colinear with calibrated True North
+#define NorthCalibrate false             //Indicates when north direction must be manually set ("true" if setting manually, "false" if compass is reading True North correctly)
+#define SouthCalibrate false             //Indicates when compass is calibrated improperly, use manually input south angle to calibrate ("true" if setting manually, "false" if compass is reading South colinear with True North)
+#define NorthOffset 7                   //Added to "HeadingTrue" to point compass at True North, used if "NorthCalibrate" = true (if compass is reading North as West of True North, then NorthOffset > 0, opposite for East)
+#define TrueSouth 180                   //Angle given by compass when pointing to True South, used if "SouthCalibrate" = true ("TrueSouth" equals reading taken colinear with calibrated True North reading)
 
-//Define calibration values for magnetometer
-#define MinMag_X -48.36
-#define MinMag_Y -55.73
-#define MinMag_Z -54.08
-#define MaxMag_X 66.36
-#define MaxMag_Y 60.73
-#define MaxMag_Z 75.20
+////Define calibration values for magnetometer, for old sensor
+//#define MinMag_X -48.36
+//#define MinMag_Y -55.73
+//#define MinMag_Z -54.08
+//#define MaxMag_X 66.36
+//#define MaxMag_Y 60.73
+//#define MaxMag_Z 75.20
+
+//Define calibration values for magnetometer, for new sensor
+#define MinMag_X -53.0909
+#define MinMag_Y -59.7273
+#define MinMag_Z -93.2653
+#define MaxMag_X 61.4545
+#define MaxMag_Y 54.2727
+#define MaxMag_Z 26.0204
 
 //-----------------------------------GLOBAL VARIABLES----------------------------
+
+//Initialization Variables
+boolean L1 = true;                        //Line 1 marker, use comman count to assign commaCnt values to pertinent headings
+boolean InitializeAntenna = true;         //Used to control for loop for locating antenna's GPS coordinates                 DO NOT USE UNLESS SPI CONNECTION IS WORKING PROPERLY
+int ConnectionStatus = 0;                 //Used to identify connection status of ethernet, for connection failure error messages
 
 //Counts to describe the positions of delimiters in incoming ground station data and number of data packages received
 int commaCnt = 0;
 int lineCnt = 0;
-
-//String objects used to hold incoming values from ground station
-String Data = "";
-String Column = "";
-const char *buff = Column.c_str(); //Uses pointer "buff" to continuously assign new data to a string in Column
 
 //Comma positions of important data
 int latCnt = 0;
 int longCnt = 0;
 int altitudeCnt = 0;
 
-//Used to denote header line during parsing of plane's GPS data
-boolean L1 = true;                        //Line 1 marker, use comman count to assign commaCnt values to pertinent headings
-boolean InitializeAntenna = true;         //Used to control for loop for locating antenna's GPS coordinates                 DO NOT USE UNLESS SPI CONNECTION IS WORKING PROPERLY
+//String objects used to hold incoming values from ground station
+String Data = "";
+String Column = "";
+const char *buff = Column.c_str(); //Uses pointer "buff" to continuously assign new data to a string in Column
 
 //Angles
 int ThetaPanRef = 0;      //Pan reference angle, used in servo functions to determine angular difference in current positions of antenna and plane
@@ -145,9 +155,11 @@ long double altitude = 0;           //GPS altitude of plane
 //long double latORG = 0;             //GPS latitude of antenna (reference)
 //long double lonORG = 0;             //GPS longitude of antenna (reference)
 //long double altORG = 0;             //GPS altitude of antenna (reference)
-long double latORG = 43.530705;     //GPS latitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
-long double lonORG = -80.576662;    //GPS longitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
-long double altORG = 344.233;       //GPS altitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
+long double latORG = 43.5311386;     //GPS latitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
+long double lonORG = -80.5771163;    //GPS longitude of antenna (reference), calculated using Google Maps for flight test at Flying Dutchmen
+//GPS coordinates of antenna at competition (reference), use GPS app on phone while on site to locate
+long double latORG = SouthPortLat;
+long double lonORG = SouthPortLon;
 
 /***      COMPASS & ACCELEROMETER     ***/
 //Declare sensor variables
@@ -344,9 +356,8 @@ void setup(){
     Serial.println("\nAccelerometer failed to be detected.");
   }
 
-  // start the Ethernet connection:
-  Ethernet.begin(mac,ip);
-  client.connect(server, 1234)
+  //Initialize Ethernet communication
+  Ethernet.begin(mac, ip);
   
   // Open serial communications and wait for port to open:
   Serial.begin(9600);
@@ -354,34 +365,31 @@ void setup(){
      // wait for serial port to connect. Needed for Leonardo only
   }
 
-  // give the Ethernet shield a second to initialize:
+  //Give the Ethernet shield a second to initialize:
   delay(1000);
   Serial.println("connecting...");
+  ConnectionStatus = client.connect(server, 1234);
 
   // if you get a connection, report back via serial:
-  if (client.connect()) {
+  if (ConnectionStatus) {
     Serial.println("connected");
   }
   else {  // if you didn't get a connection to the server:
     Serial.println("connection failed");
-    if(client.connect() = -1){
+    if(ConnectionStatus == -1){
       Serial.println("connection timed out");
     }
-    else if((client.connect() = -2){
+    else if(ConnectionStatus == -2){
       Serial.println("invalid server");
     }
-    else if((client.connect() = -3){
+    else if(ConnectionStatus == -3){
       Serial.println("truncated");
     }
-    else if((client.connect() = -2){
+    else if(ConnectionStatus == -4){
       Serial.println("invalid response");
     }
+    Serial.print("ConnectionStatus: "); Serial.println(ConnectionStatus);
   }
-
-//  //Initialize SPI connection and retrieve antenna coordinates                                                    DO NOT USE UNTIL SPI CONNECTION IS WORKING
-//  pinMode(SS, OUTPUT);  //Declare slave-select pin
-//  SPI.begin();
-//  SPI.setBitOrder(MSBFIRST);  //Sets bit order for data transfer, determined by microprocessor
 
   //Set up soft iron matrix and bias vector for calibration of magnetometer data
   //Define soft iron transform matrix
@@ -393,7 +401,7 @@ void setup(){
   SoftIronTransform[1][2] = 0.0029;
   SoftIronTransform[2][0] = -0.0112;
   SoftIronTransform[2][1] = 0.0029;
-  SoftIronTransform[2][2] = 1.0554;       //Seems to be some discrepancy in the Y direction with these numbers (X and Z are good)
+  SoftIronTransform[2][2] = 1.0554;
   Matrix.Invert((float*)SoftIronTransform, 3);
   
   //Define bias vector
@@ -410,12 +418,12 @@ void setup(){
 //  int i, j;
 //  for(i = 0; i < 3; i++){
 //    char *pGPSData = (char *)(&InDATA);                                                   //MAY BE DIFFICULT TO USE SIZEOF TO SET
-//    uint16_t *pGPSData = (uint16_t*)(&InDATA);                                            //MAY NEED TO ADD LIBRARY, BUT MAY BE DIFFICULT TO USE SIZEOF TO SET FOR LOOP
+////    uint16_t *pGPSData = (uint16_t*)(&InDATA);                                            //MAY NEED TO ADD LIBRARY, BUT MAY BE DIFFICULT TO USE SIZEOF TO SET FOR LOOP
 //    digitalWrite(SS, LOW);                                                                //INPUT (SDI) CONNECTS TO OUTPUT ON THE ARDUINO
 //    for (j = 0; j < sizeof(GPSData); j += 2, pGPSData++){                                 //USE SIZEOF
 //      *(pGPSData+i) = SPI.transfer16(OutDATA);                                            //THIS ALLOWS ME TO INCREMENT ONLY i IN THE FOR LOOP
-//      *(&InDATA+i) = SPI.transfer16(OutDATA);                                             //JUMPS OVER STRUCT, +i CAUSES INCREMENT OF SIZE OF STRUCT WHEN WRITTEN THIS WAY
-//      *(pGPSData) = SPI.transfer16(OutDATA);
+////      *(&InDATA+i) = SPI.transfer16(OutDATA);                                             //JUMPS OVER STRUCT, +i CAUSES INCREMENT OF SIZE OF STRUCT WHEN WRITTEN THIS WAY
+////      *(pGPSData) = SPI.transfer16(OutDATA);
 //    }
 //    digitalWrite(SS, HIGH);
 //    delay(1000);
@@ -445,7 +453,7 @@ long double getDistance(long double Lat1, long double Lon1, long double Lat2, lo
 
 //--------------------------------------------------------Servo Functions---------------------------------------------------------------
 
-//Calculate angle between plane and true north
+//Calculate angle between air plane and true north
 float GetThetaXY(long double lonDiff, long double latDiff){
   float ThetaXY = degrees(atan2(lonDiff, latDiff));
 
@@ -460,7 +468,7 @@ float GetThetaXY(long double lonDiff, long double latDiff){
 //  return ThetaXZ;
 //}
 
-//Calcuated angle of plane off of horizontal
+//Calcuated angle of air plane off of horizontal
 //Height given is distance from ground, incoming altitude data accounts for altitude of location
 float GetThetaXZ(long double distance, long double height){
   float ThetaXZ = degrees(atan2(height, distance));  
@@ -492,8 +500,9 @@ float SetTiltOffset(float *pUnitInertX, float *pUnitInertY){
   return ThetaInitial;
 }
 
+//Sets servo motor to position by converting input angle into PWM
 void SetPan(int Theta){
-  //Account for rollover condition, pan motion should be continuous when transitioning from -180-->180 (due south)
+  //Account for rollover condition, pan motion should be continuous when transitioning from -180-->180 or vice versa (due south)
   if(LastThetaPan < -120 && Theta > 0){
     LastThetaPan = Theta - 360;
   }
@@ -513,6 +522,7 @@ void SetPan(int Theta){
   }
 }
 
+//Sets servo motor to position by converting input angle into PWM
 void SetTilt(int Theta){   
   servoTiltLastWrite = millis();
   
@@ -724,7 +734,6 @@ void loop(){
   if (client.available()) {
   char c = client.read();
   Data = String(c);
-  //Serial.print(c);
 
     //Set servo motors to their midpoints for automated calibration and calculate offset angles for servo reference
     //Locate antenna GPS coordinates, used to calculate distance to plane and altitude difference
@@ -732,10 +741,10 @@ void loop(){
       //Set servo motors to midpoints and calcuates reference angles at midpoint positions
       servoTilt.writeMicroseconds(SERVO_MIDPOINT);
       servoPan.writeMicroseconds(SERVO_MIDPOINT);
-      delay(3000);
+      delay(10000);
       
       //Retrieves sensor (compass and accelerometer) data
-      GetVectorData((long double*)MagNorthComp, (long double*)NegGravity);
+      GetVectorData((float*)BiasVec, (float*)SoftIronTransform, (float*)MagNorthComp, (float*)NegGravity);
       //Defines an inertial frame of reference using the magnetic north vector read from the compass
       DefineInertAxes((float*)MagNorthComp, (float*)NegGravity, (float*)UnitInertX, (float*)UnitInertY, (float*)UnitInertZ);
       //Defines a change of basis matrix used to convert the magnetic north vector from the compass coordinate system to the inertial frame of reference
@@ -755,68 +764,68 @@ void loop(){
       
       InitializeAntenna = false;
     }
-    
-    if (c != ','){ //as long as the read char is not a ',' do this
-      Column += Data; //Assign the Data string to Column
+
+    //Accumulate data characters in "Column" until the next comma is reached
+    if (c != ','){
+      Column += Data;
     }
-    
-    if (c == ','){ //Whenever char that is read is a comma do this
-      if (L1 == true){  //sets the comma count of each important column
+
+    //Whenever char that is read is a comma do this
+    if (c == ','){
+      
+      //Set the comma count of each important column
+      if (L1 == true){  
         if (Column == "lat"){
-          latCnt = commaCnt + 1;
+          latCnt = commaCnt;
           //Serial.println(latCnt);
         }
        
         if (Column == "lon"){
-          longCnt = commaCnt + 1;
+          longCnt = commaCnt;
           //Serial.println(longCnt);
         }
        
         if (Column == "altitude"){
-          altitudeCnt = commaCnt + 1;
+          altitudeCnt = commaCnt;
           //Serial.println(altitudeCnt);
         }
-      }  
-  
-      if (commaCnt == latCnt && L1 == false){ //when we are at the latitude column, copy number into "latitude"
-         buff = Column.c_str();//comment this line out when using in the field      WHY?
-         //buff = Column.substring(0, 10).c_str();  //comment this line in when using in the field
-         //String tempBuff = Column.substring(2);  //comment this line in when using in the field               MIGHT NEED TO ADD THIS WITH AN IF(commaCnt == 0) IF THERE IS A NEW LINE CHARACTER AT THE BEGINNING OF THE DATA
-         //buff = tempBuff.c_str();
-         //buff[0] = ' ';
+      }
+        
+      //If the comma count indicates the latitude column, copy number into "lat"
+      if (commaCnt == latCnt && L1 == false){ 
+         buff = Column.c_str();
          lat = strtod(buff,NULL);
-         //Serial.println(tempBuff);
-         //Serial.println(lat);
       }
        
-      if (commaCnt == longCnt && L1 == false){ //when we are at the longitude column, copy number into "longitude"
-        //West is negative, East is positive
+      //If the comma count indicates the longitude column, copy number into "lon"
+      //West is negative, East is positive
+      if (commaCnt == longCnt && L1 == false){
          buff = Column.c_str();
          lon = strtod(buff,NULL);
-         //Serial.println(lon);
       }
       
-      if (commaCnt == altitudeCnt && L1 == false){ //when we are at the altitude column, copy number into "altitude"
+      //If the comma count indicates the altitude column, copy number into "altitude"
+      //Altitude indicates height of plane from ground, calibrated through ground station
+      if (commaCnt == altitudeCnt && L1 == false){
          buff = Column.c_str();
          altitude = strtod(buff,NULL);
-         //Serial.println(altitude);
       }
            
-      Column = "";  //Assign empty string to Column
-      commaCnt += 1;
+      Column = "";        //Assign empty string to "Column"
+      commaCnt += 1;      //Increment comma count
                
     }    //end if comma check     
         
     if (c =='\n'){ //when there is a new line do this
 
       L1 = false;         //Reset heading line indicator
-      commaCnt = 0;   //Reset comma count
-      lineCnt +=1;    //Increment line count
-      Column = "";    //Assign empty string to Column
+      commaCnt = 0;       //Reset comma count
+      lineCnt +=1;        //Increment line count
+      Column = "";        //Assign empty string to Column
     
       if (L1 == false){
         //Retrieves sensor (compass and accelerometer) data
-        GetVectorData((float*)MagNorthComp, (float*)NegGravity);
+        GetVectorData((float*)BiasVec, (float*)SoftIronTransform, (float*)MagNorthComp, (float*)NegGravity);
         //Defines an inertial frame of reference using the magnetic north vector read from the compass
         DefineInertAxes((float*)MagNorthComp, (float*)NegGravity, (float*)UnitInertX, (float*)UnitInertY, (float*)UnitInertZ);
         //Defines a change of basis matrix used to convert the magnetic north vector from the compass coordinate system to the inertial frame of reference
