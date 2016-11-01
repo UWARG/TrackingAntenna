@@ -5,6 +5,24 @@ An arduino controls 2 servos for plane tracking (pan and tilt).
 Communication from the xbee if achieved with an ethernet shield. 
 There is a simple debug interface through serial.
 
+
+**Libaries**
+[MatrixMath](https://github.com/codebendercc/MatrixMath)
+[Adafruit_Sensor](https://github.com/adafruit/Adafruit_Sensor)
+Servo
+SPI
+Ethernet
+
+**Installation**
+1. Install the [Arduino development environment](https://www.arduino.cc/en/Main/Software)
+2. Install the following libraries using the Arduino Library Repository
+  * Servo
+  * SPI
+  * Ethernet
+3. Install the following libraries by downloading and including the files:
+  * Matrix Math
+  * Adafruit Sensor
+
 **Quick setup guide:**
 
 1. Set INITIALISATION to 0.
