@@ -39,6 +39,9 @@ There is a simple debug interface through serial.
 7. Determine the IP address of the computer. Once again, you can do this by typing `ipconfig /all` in a CMD window. Replace the IP address in the line `IPAddress server(192,168,1,103);  //pi or computer that is hosting the data`. This once again may be dynamically allocated in the future, using a data-relay-station broadcasting feature.
 8. You can detect a succesful connection by opening up the Arduino serial monitor, or by checking the data-relay-station terminal output for a familiar IP address.
 
+A successful data-relay-station connection may look as such:
+![data-relay-station connection](http://imgur.com/hdNWMdi.png)
+
 **Quick setup guide:**
 
 1. Set INITIALISATION to 0.
