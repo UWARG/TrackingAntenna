@@ -7,21 +7,37 @@ There is a simple debug interface through serial.
 
 
 **Libaries**
-[MatrixMath](https://github.com/codebendercc/MatrixMath)
-[Adafruit_Sensor](https://github.com/adafruit/Adafruit_Sensor)
-Servo
-SPI
-Ethernet
+
+* [MatrixMath](https://github.com/codebendercc/MatrixMath)
+* [Adafruit_Sensor](https://github.com/adafruit/Adafruit_Sensor)
+* Servo
+* SPI
+* Ethernet
+* Adafruit LSM303DLHC
 
 **Installation**
+
 1. Install the [Arduino development environment](https://www.arduino.cc/en/Main/Software)
 2. Install the following libraries using the Arduino Library Repository
   * Servo
   * SPI
   * Ethernet
+  * Adafruit LSM303DLHC
+  
 3. Install the following libraries by downloading and including the files:
   * Matrix Math
   * Adafruit Sensor
+
+**Connecting to the Network**
+
+1. Plug in router and connect Arduino Ethernet Shield to ethernet port on router. (If using the wired router, also connect the computer otherwise the WIFI network should work).
+2. ENSURE YOU ARE CONNECTED TO THE CORRECT NETWORK.
+3. Using [data-relay-station](https://github.com/UWARG/data-relay-station) navigate to the install directory of the data-relay-station and launch a terminal or CMD window.
+4. Type `py data_relay.py` to start the data-relay-station. Alternatively, use simulation file by typing `py data_relay.py --simfile <filename.csv>`
+5. Determine the IP Address of the router. You can do this by typing `ipconfig /all` in a CMD window (on windows).
+6. Choose an IP address for the Arduino. It must be within the valid subnet. Typically, the first few numbers of the IP address are shared with the router. If it isn't, you may be doing something wrong. Replace the line `IPAddress ip(192,168,1,107); //this is for the arduino` with the correct address. Note, this may be changed in the future, where the arduino will self-initialize its IP address.
+7. Determine the IP address of the computer. Once again, you can do this by typing `ipconfig /all` in a CMD window. Replace the IP address in the line `IPAddress server(192,168,1,103);  //pi or computer that is hosting the data`. This once again may be dynamically allocated in the future, using a data-relay-station broadcasting feature.
+8. You can detect a succesful connection by opening up the Arduino serial monitor, or by checking the data-relay-station terminal output for a familiar IP address.
 
 **Quick setup guide:**
 
