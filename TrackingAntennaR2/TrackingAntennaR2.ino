@@ -1,3 +1,5 @@
+#define UNIT_TEST true //change this to run unit tests or not
+
 /*
 
  This sketch connects to a a telnet server (http://www.google.com)
@@ -59,6 +61,10 @@ Model No. ST LSM303DLHC
 #include <SPI.h>
 #include <MatrixMath.h>
 
+#if UNIT_TEST
+#include <ArduinoUnit.h>
+#endif
+
 //Adafruit Libraries
 #include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h> 
@@ -112,6 +118,7 @@ Model No. ST LSM303DLHC
 boolean L1 = true;                        //Line 1 marker, use comman count to assign commaCnt values to pertinent headings
 boolean InitializeAntenna = true;         //Used to control for loop for locating antenna's GPS coordinates                 DO NOT USE UNLESS SPI CONNECTION IS WORKING PROPERLY
 int ConnectionStatus = 0;                 //Used to identify connection status of ethernet, for connection failure error messages
+bool unitTest = true;
 
 //Counts to describe the positions of delimiters in incoming ground station data and number of data packages received
 int commaCnt = 0;
@@ -320,6 +327,11 @@ Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);      
 Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID);    //Create compass object to read acceleration values
 
 void setup(){  
+  Serial.begin(9600);
+  while (!Serial) {
+  // wait for serial port to connect. Needed for Leonardo only
+  }
+
   //Attaches the servos
   //usage: servo.attach(pin, minPWM, maxPWM)
   servoPan.attach(5, 600, 2400);
@@ -339,12 +351,6 @@ void setup(){
 
   //Initialize Ethernet communication
   Ethernet.begin(mac, ip);
-  
-  // Open serial communications and wait for port to open:
-  Serial.begin(9600);
-   while (!Serial) {
-     // wait for serial port to connect. Needed for Leonardo only
-  }
 
   //Give the Ethernet shield a second to initialize:
   delay(1000);
@@ -389,6 +395,7 @@ void setup(){
   BiasVec[0] = 9.6778;
   BiasVec[1] = 2.1963;
   BiasVec[2] = 3.4728;
+
 }
 
 // ---------------------------------GPS FUNCTIONS--------------------------------------
@@ -693,6 +700,12 @@ float AntennaHeadingTrue(float *pChangeBasis, float *pUnitInertX, float *pHeadin
 //-------------------------------------MAIN------------------------------------------------------
 
 void loop(){
+  #if UNIT_TEST
+  while(1){
+    Test::run();
+  }
+  #endif
+  
   //If there are incoming bytes available from the server, read them and print them:
   if (client.available()) {
   char c = client.read();
