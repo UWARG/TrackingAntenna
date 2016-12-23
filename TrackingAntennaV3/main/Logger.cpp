@@ -23,3 +23,8 @@ void debug(const char* message){
 		Serial.println(message);
 	#endif
 }
+
+void error(const char* message){
+  debug(message);
+}
+

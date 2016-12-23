@@ -12,9 +12,9 @@ void setup(){
 }
 
 void loop(){
-  parsePacket();
-  Serial.println(network_data.alt);
-  Serial.println(network_data.lon);
-  Serial.println(network_data.lat);
+  //parsePacket();
+  //Serial.println(network_data.alt);
+  //Serial.println(network_data.lon);
+  //Serial.println(network_data.lat);
 }
 

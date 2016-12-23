@@ -21,4 +21,11 @@ void initDebug(void);
 */
 void debug(const char* message);
 
+
+/**
+ * Higher level warning than debug level messages. For now they do
+ * the same thing.
+ */
+void error(const char* message);
+
 #endif

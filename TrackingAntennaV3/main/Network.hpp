@@ -20,8 +20,8 @@
  * Data relay header names for altitude, latitude, and longitude
  */
 #define ALTITUDE_HEADER_NAME "altitude"
-#define LATITUDE_HEADER_NAME "latitude"
-#define LONGITUDE_HEADER_NAME "longitude"
+#define LATITUDE_HEADER_NAME "lat"
+#define LONGITUDE_HEADER_NAME "lon"
 
 /**
  * Mac address of the ethernet shield/interface

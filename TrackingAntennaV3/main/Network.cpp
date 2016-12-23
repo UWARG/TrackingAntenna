@@ -19,9 +19,10 @@ static EthernetClient client;
 static char data_buffer[100]; //we're not going to receive anything greater than 100 bytes
 
 //define index positions of the data we're interested in the packets that we're receiving
-static int alt_index = 0;
-static int lat_index = 0;
-static int lon_index = 0;
+//initialize to -1 so we can later see if the appropriate headers were detected
+static int alt_index = -1;
+static int lat_index = -1;
+static int lon_index = -1;
 static int lines_read = 0; //for keeping track of how many lines/terms/headers in a packet we've parsed
 static int buffer_counter = 0; //index position counter for the data buffer
 
@@ -36,6 +37,7 @@ static byte mac[] = {MAC_ADDR_1,MAC_ADDR_2,MAC_ADDR_3,MAC_ADDR_4,MAC_ADDR_5,MAC_
 static IPAddress data_relay_ip(DATA_RELAY_IP1, DATA_RELAY_IP2, DATA_RELAY_IP3, DATA_RELAY_IP4);
 
 static void printConnectionStatusMessage(int status);
+static bool allHeadersReceived(void);
 
 void initNetwork(void){
 	int connection_status = 0;
@@ -117,13 +119,9 @@ void parseHeaders(void){
 			
 			if(strcmp(data_buffer, altitude_header) == 0){ //if the header we just parsed was for altitude
 				alt_index = lines_read;
-			}
-
-			if(strcmp(data_buffer, latitude_header) == 0){ //if the header we just parsed was for latittude
+			} else if(strcmp(data_buffer, latitude_header) == 0){ //if the header we just parsed was for latittude
 				lat_index = lines_read;
-			}
-
-			if(strcmp(data_buffer, longitude_header) == 0){ //if the header we just parsed was for longitude
+			} else if(strcmp(data_buffer, longitude_header) == 0){ //if the header we just parsed was for longitude
 				lon_index = lines_read;
 			}
 
@@ -132,12 +130,45 @@ void parseHeaders(void){
 		} else if (c == '\n'){ //we've reached the end of the packet, break out of the loop
 			buffer_counter = 0;
 			lines_read = 0;
+
+     debug("Headers finished parsing");
+
+     //stop execution if we werent able to parse all the headers, since any incoming data will be useless
+      if(!allHeadersReceived()){
+        while(1);
+      }
 			return;
 		} else {
 			data_buffer[buffer_counter] = c;
 			buffer_counter++;
 		}
 	}
+}
+
+/**
+ * For warning the user if we were unable to parse the positions of the altitude, 
+ * latitude, and longitude from the first header packet.
+ * Returns a boolean indicating if all 3 headers were successfully parsed.
+ */
+static bool allHeadersReceived(void){
+  bool success = true;
+  if(alt_index == -1){
+    error("Altitude header position could not be parsed from data relay packet!!!");
+    success = false;
+  }
+  
+  if(lat_index == -1){
+    error("Latitude header position could not be parsed from data relay packet!!!");
+    success = false;
+    
+  }
+  
+  if(lon_index == -1){
+    error("Longitude header position could not be parsed from data relay packet!!!");
+    success = false;
+  }
+  
+  return success;
 }
 
 //Prints out a status message depending on the connection status
