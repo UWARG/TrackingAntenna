@@ -3,8 +3,12 @@
  * @Author Serj Babayan (WARG)
  * @date   December 20, 2016
  */
- 
+
 #include "Network.hpp"
+#include "Logger.hpp"
+#include "Util.hpp"
+#include <string.h>
+#include <Ethernet.h>
 
 //represents the current state of the altitude, latitude, and longitude
 //defined globally
@@ -44,14 +48,10 @@ void initNetwork(void){
   }
   
   debug("Connected to network with IP: ");
-  IPAddress localAddr = Ethernet.localIP();
-  byte oct1 = localAddr[0];
-  byte oct2 = localAddr[1];
-  byte oct3 = localAddr[2];
-  byte oct4 = localAddr[3];
-  char s[16];  
-  sprintf(s, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
-  debug(s);
+  char string[16];
+  IPAddress ip = Ethernet.localIP();
+  ipToString(&ip, string);
+  debug(string);
 
   //Give the Ethernet shield a second to initialize:
   delay(1000);

@@ -4,6 +4,10 @@
  * @date   December 20, 2016
  */
 
+#include "Logger.hpp"
+#include <HardwareSerial.h>
+#include <string.h> //needed for memcpy
+
 void initDebug(void){
 	#if DEBUG_MESSAGES
 	Serial.begin(BAUD_RATE);

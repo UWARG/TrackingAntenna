@@ -10,10 +10,6 @@
 #ifndef NETWORK
 #define NETWORK
 
-#include <Ethernet.h>
-#include "Logger.hpp"
-#include <string.h>
-
 /**
  *IP adress of the data relay station and port
  */
@@ -79,6 +75,12 @@ void renewNetwork(void);
  */
 void parseHeaders(void);
 
+/**
+ * Same as parseHeaders, only will parse an incoming packet stream representing the data.
+ * Will update network_data global variable with the newly parsed altitude, latitude, and
+ * longitude information. Will parse 1 whole entire packet synchronously. Requires that
+ * parseHeaders be called before.
+ */
 void parsePacket(void);
 
 #endif

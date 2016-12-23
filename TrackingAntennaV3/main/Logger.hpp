@@ -7,10 +7,6 @@
 #ifndef LOGGER
 #define LOGGER
 
-#include "Logger.hpp"
-#include <HardwareSerial.h>
-#include <string.h> //needed for memcpy
-
 #define DEBUG_MESSAGES 1
 #define BAUD_RATE 9600
 
