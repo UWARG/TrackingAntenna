@@ -51,31 +51,29 @@
  extern volatile NetworkData network_data;
 
 /**
- * Initializes the network connection
+ * Initializes the ethernet connection, attempts to connect to the data relay,
+ * and parses headers
 */
  void initNetwork(void);
 
 /**
  * Attempts to renew the DHCP lease with the router, only when necessary.
  * Can be called as many times as possible, it will only perform the re-request
- * if one is required
+ * if one is required.
+ * 
+ * In addition checks if the connection to the data relay server is still active.
+ * If not, will attempt to re-initialize it.
 */
  void renewNetwork(void);
-
-/**
- * Will parse the headers received from the data relay. Will parse the entire
- * received packet, and save the indices of the headers corresponding to altitude,
- * longitude, and latitude. Should be called right after network initialization.
- * Is required for correct packet parsing to occur. Will wait until headers are received.
- */
- void parseHeaders(void);
 
 /**
  * Same as parseHeaders, only will parse an incoming packet stream representing the data.
  * Will update network_data global variable with the newly parsed altitude, latitude, and
  * longitude information. Will parse 1 whole entire packet synchronously. Requires that
  * parseHeaders be called before.
+ * 
+ * Returns true if values for altitude, longitude, and latitude were parsed from a packet.
  */
- void parsePacket(void);
+ bool parsePacket(void);
 
 #endif

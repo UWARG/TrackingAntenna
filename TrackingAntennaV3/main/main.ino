@@ -6,14 +6,16 @@ void setup(){
     info("Starting up...");
 
     initNetwork();
-    parseHeaders();
 }
 
 void loop(){
-    parsePacket();
-    Serial.println(network_data.alt*1000);
-    Serial.println(network_data.lon*1000);
-    Serial.println(network_data.lat*1000);
+    if(parsePacket()){
+      
+    }
+    Serial.println(network_data.alt);
+      Serial.println(network_data.lon);
+      Serial.println(network_data.lat);
+   
     renewNetwork();
 }
 

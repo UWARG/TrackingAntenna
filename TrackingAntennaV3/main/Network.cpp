@@ -30,6 +30,8 @@ static IPAddress data_relay_ip(DATA_RELAY_IP1, DATA_RELAY_IP2, DATA_RELAY_IP3, D
 
 static void printConnectionStatusMessage(int status);
 static bool allHeadersReceived(void);
+static void connectDataRelay(void);
+static void parseHeaders(void);
 
 void initNetwork(void){
     int connection_status = 0;
@@ -49,24 +51,20 @@ void initNetwork(void){
 
     //Give the Ethernet shield a second to initialize:
     delay(1000);
-
-    //try to connect to data relay, and keep trying if not successful
-    while(connection_status != 1){
-        info("Attempting to connect to data relay server...");
-        connection_status = client.connect(data_relay_ip, DATA_RELAY_PORT);
-        printConnectionStatusMessage(connection_status);
-    }
+    connectDataRelay();
+    parseHeaders();
+   
 }
 
-void renewNetwork(){
-    Ethernet.maintain();
-}
-
-void parsePacket(void){
+bool parsePacket(void){
     char c; //character we've just read
     int buffer_counter = 0;
     int lines_read = 0;
     char data_buffer[64]; //nothing we read will be larger than 64 bytes
+
+    if(!client.available()){ //if no new data available, don't do anything
+      return 0;
+    }
 
     while(client.available()) {
         c = client.read();
@@ -97,9 +95,29 @@ void parsePacket(void){
             buffer_counter++;
         }
     }
+    
+    return 1;
 }
 
-void parseHeaders(void){
+void renewNetwork(){
+    //renew DHCP lease if necessary
+    Ethernet.maintain();
+
+    //check if we're still connected to the data relay
+    if(!client.connected()){
+      client.stop();
+      connectDataRelay();
+      parseHeaders();
+    }
+}
+
+/**
+ * Will parse the headers received from the data relay. Will parse the entire
+ * received packet, and save the indices of the headers corresponding to altitude,
+ * longitude, and latitude. Should be called right after network initialization.
+ * Is required for correct packet parsing to occur. Will wait until headers are received.
+ */
+static void parseHeaders(void){
     char c; //character we've just read
     int buffer_counter = 0;
     int lines_read = 0;
@@ -140,6 +158,26 @@ void parseHeaders(void){
         } else {
             data_buffer[buffer_counter] = c;
             buffer_counter++;
+        }
+    }
+}
+
+/**
+ * Initializes a connection with the data relay station.
+ * Will continually attempt to do so if unsuccessful
+ */
+static void connectDataRelay(void){
+    int connection_status = 0;
+    
+    //try to connect to data relay, and keep trying if not successful
+    while(connection_status != 1){
+        info("Attempting to connect to data relay server...");
+        connection_status = client.connect(data_relay_ip, DATA_RELAY_PORT);
+        printConnectionStatusMessage(connection_status);
+
+        //wait a second before trying to connect again
+        if(connection_status != 1){
+          delay(1000);
         }
     }
 }
