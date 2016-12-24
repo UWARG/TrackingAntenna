@@ -91,6 +91,7 @@ or maintain.
   latitude, longtiude, altitude values from the plane and gps values of the tracking antenna.
 
 *Notes*:
+- Not implemented yet
 - Should not use the global variables defined by the other modules. The functions for the calculation
   should take in the required values as function parameters.
 
