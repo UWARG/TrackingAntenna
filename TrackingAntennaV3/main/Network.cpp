@@ -16,15 +16,12 @@ volatile NetworkData network_data;
 
 //initialize the Ethernet client library
 static EthernetClient client;
-static char data_buffer[100]; //we're not going to receive anything greater than 100 bytes
 
 //define index positions of the data we're interested in the packets that we're receiving
 //initialize to -1 so we can later see if the appropriate headers were detected
 static int alt_index = -1;
 static int lat_index = -1;
 static int lon_index = -1;
-static int lines_read = 0; //for keeping track of how many lines/terms/headers in a packet we've parsed
-static int buffer_counter = 0; //index position counter for the data buffer
 
 //names of the packet headers
 static const char altitude_header[] = ALTITUDE_HEADER_NAME;

@@ -1,11 +1,9 @@
 #include "Logger.hpp"
 #include "Network.hpp"
 
-
 void setup(){
   initDebug();
-
-  debug("Starting up");
+  info("Starting up...");
   
   initNetwork();
   parseHeaders();
