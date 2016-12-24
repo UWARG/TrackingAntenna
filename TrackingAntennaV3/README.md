@@ -8,6 +8,11 @@ A breakdown of the new code base has been planned, and a description of
 all the different modules used is listed below. Each module will preferably
 be implemented with a `ModuleName.hpp` and a `ModuleName.cpp` file.
 
+Note that it was discussed before that the tracking antenna should have
+a menu that would interact with the user. Before that is scoped out and
+implemented however it's better to build the base for the tracking antenna,
+before adding user interactivity to it.
+
 ### Network Module
 *Responsible for*:
 - Connecting to the router through the ethernet shield
@@ -95,6 +100,15 @@ or maintain.
 - Should not use the global variables defined by the other modules. The functions for the calculation
   should take in the required values as function parameters.
 
+### LCD Module
+*Responsible for*:
+- Providing generic functions for outputting text to an LCD display
+
+*Notes*:
+- **Not implemented yet**
+- What text the LCD should display still has to be scoped out. An idea would be to display the 
+  pan and tilt angles the tracking antenna is trying to get to.
+  
 ### Main Module
 Starting point of the application. Should be relatively short.
 The only logic stored here should be for calling the intialization functions
