@@ -72,6 +72,9 @@ void renewNetwork(){
 
 void parsePacket(void){
 	char c; //character we've just read
+  int buffer_counter = 0;
+  int lines_read = 0;
+  char data_buffer[64]; //nothing we read will be larger than 64 bytes
 
 	while(client.available()){
 		c = client.read();
@@ -79,8 +82,6 @@ void parsePacket(void){
 		if(c == ','){ //if we just read a comma in, means we can interpret the word/header
 			data_buffer[buffer_counter] = 0; //terminate our c string with the null character
 			
-			lines_read++;
-
 			//check if the index of the data we just read corresponds to the altitude, longitude, or altitude
 			//if so convert the received string to float and save the corresponding values
 			if(lines_read == alt_index){
@@ -92,6 +93,7 @@ void parsePacket(void){
 			}
 
 			buffer_counter = 0;
+      lines_read++;
 		} else if (c == '\n'){ //we've reached the end of the packet, break out of the loop
 			buffer_counter = 0;
 			lines_read = 0;

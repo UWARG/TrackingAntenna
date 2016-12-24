@@ -7,7 +7,13 @@
 #ifndef LOGGER
 #define LOGGER
 
+/**
+ * Message levels to display
+ */
 #define DEBUG_MESSAGES 1
+#define INFO_MESSAGES 1
+#define ERROR_MESSAGES 1
+
 #define BAUD_RATE 9600
 
 /*
@@ -27,5 +33,10 @@ void debug(const char* message);
  * the same thing.
  */
 void error(const char* message);
+
+/**
+ * Info level messages. For now does same thing as debug
+ */
+void info(const char* message);
 
 #endif
