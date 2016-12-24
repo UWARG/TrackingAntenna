@@ -118,3 +118,7 @@ and calling the calculation logic functions.
 *Notes*:
 - **This is the only module that is allowed to use the global variables defined in the other modules.**
 
+## Naming Convention
+`CAPITAL_SNAKE_CASE` for #define constants
+`regular_snake_case` for variables
+`camelCase()` for functions
