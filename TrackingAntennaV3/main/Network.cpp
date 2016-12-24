@@ -53,7 +53,7 @@ void initNetwork(void){
     delay(1000);
     connectDataRelay();
     parseHeaders();
-   
+
 }
 
 bool parsePacket(void){
@@ -63,7 +63,7 @@ bool parsePacket(void){
     char data_buffer[64]; //nothing we read will be larger than 64 bytes
 
     if(client.available() == 0){
-      return false;
+        return false;
     }
 
     while(client.available()) {
@@ -95,7 +95,7 @@ bool parsePacket(void){
             buffer_counter++;
         }
     }
-    
+
     return true;
 }
 
@@ -105,9 +105,9 @@ void renewNetwork(){
 
     //check if we're still connected to the data relay
     if(!client.connected()){
-      client.stop();
-      connectDataRelay();
-      parseHeaders();
+        client.stop();
+        connectDataRelay();
+        parseHeaders();
     }
 }
 
@@ -168,7 +168,7 @@ static void parseHeaders(void){
  */
 static void connectDataRelay(void){
     int connection_status = 0;
-    
+
     //try to connect to data relay, and keep trying if not successful
     while(connection_status != 1){
         info("Attempting to connect to data relay server...");
@@ -177,7 +177,7 @@ static void connectDataRelay(void){
 
         //wait a second before trying to connect again
         if(connection_status != 1){
-          delay(1000);
+            delay(1000);
         }
     }
 }

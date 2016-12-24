@@ -37,24 +37,24 @@
 #define MAC_ADDR_5 0x2C
 #define MAC_ADDR_6 0x9A
 
- typedef struct {
- 	float alt;
- 	float lat;
- 	float lon;
- } NetworkData;
+typedef struct {
+    float alt;
+    float lat;
+    float lon;
+} NetworkData;
 
 /**
  * Global variable representing the current state of the network data parsed.
  * Includes altitude, longitude, and longitude, which is all we really care about
  * for the tracking antenna.
  */
- extern volatile NetworkData network_data;
+extern volatile NetworkData network_data;
 
 /**
  * Initializes the ethernet connection, attempts to connect to the data relay,
  * and parses headers
-*/
- void initNetwork(void);
+ */
+void initNetwork(void);
 
 /**
  * Attempts to renew the DHCP lease with the router, only when necessary.
@@ -63,8 +63,8 @@
  * 
  * In addition checks if the connection to the data relay server is still active.
  * If not, will attempt to re-initialize it.
-*/
- void renewNetwork(void);
+ */
+void renewNetwork(void);
 
 /**
  * Same as parseHeaders, only will parse an incoming packet stream representing the data.
@@ -74,6 +74,6 @@
  * 
  * Returns true if values for altitude, longitude, and latitude were parsed from a packet.
  */
- bool parsePacket(void);
+bool parsePacket(void);
 
 #endif
