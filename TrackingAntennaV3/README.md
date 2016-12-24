@@ -37,7 +37,7 @@ Three seperate modules with very similar functionalities.
 - Parsing the received values into a usable form
 
 *Notes*:
-- Not implemented yet
+- **Not implemented yet**
 - Would be nice if there was detection of a sensor disconnect, and a way
   to attempt a reconnect (same as the network)
 - Like the network, each module should provide a globally define variable/struct providing
@@ -82,7 +82,7 @@ or maintain.
 - Providing generic functions for controlling the servos of the tracking antenna
 
 *Notes*:
-- Not implemented yet
+- **Not implemented yet**
 - Should really provide 2 functions, `pan(int angle)` and `tilt(int angle)` for controlling the tracking antenna
 
 #### Calculator Module
@@ -91,7 +91,7 @@ or maintain.
   latitude, longtiude, altitude values from the plane and gps values of the tracking antenna.
 
 *Notes*:
-- Not implemented yet
+- **Not implemented yet**
 - Should not use the global variables defined by the other modules. The functions for the calculation
   should take in the required values as function parameters.
 
