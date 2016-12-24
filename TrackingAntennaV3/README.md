@@ -8,7 +8,7 @@ A breakdown of the new code base has been planned, and a description of
 all the different modules used is listed below. Each module will preferably
 be implemented with a `ModuleName.hpp` and a `ModuleName.cpp` file.
 
-#### Network Module
+### Network Module
 *Responsible for*:
 - Connecting to the router through the ethernet shield
 - Connecting to the data relay server
@@ -28,7 +28,7 @@ the latest parsed longitude, latitude, and altitude values
 - The ethernet shield connects via DHCP by default
 - The IP and port of the data relay is hard-coded
 
-#### Acceloremeter/Magnetometer/GPS Modules
+### Acceloremeter/Magnetometer/GPS Modules
 Three seperate modules with very similar functionalities.
 
 *Responsible for*:
@@ -43,7 +43,7 @@ Three seperate modules with very similar functionalities.
 - Like the network, each module should provide a globally define variable/struct providing
   the latest values for the corresponding sensors
   
-#### Linear Algebra Module
+### Linear Algebra Module
 Preferably if possible a library should be used for this instead. This
 module is responsible for providing any functions necessary for manipulating
 vectors and matrices that is required for the tracking antenna to calculate
@@ -55,7 +55,7 @@ vectors, etc. ie no raw array manipulations
 Again, ideally this should be a library that we don't have to implement, unit test,
 or maintain.
 
-#### Logger Module
+### Logger Module
 *Responsible for*:
 - Providing functions to abstract logging
 
@@ -72,11 +72,11 @@ or maintain.
   values and such (so Serial.println). Keep in mind Serial.println SHOULD NOT BE USED in production
   code, only when you're developing.
   
-#### Util Module
+### Util Module
 *Responsible for*:
 - Providing any generic functions that don't really fit into any other module. This module should be relatively small
 
-#### Tracking Antenna Module
+### Tracking Antenna Module
 *Responsible for*:
 - Servo intitialization for the tracking antenna
 - Providing generic functions for controlling the servos of the tracking antenna
@@ -85,7 +85,7 @@ or maintain.
 - **Not implemented yet**
 - Should really provide 2 functions, `pan(int angle)` and `tilt(int angle)` for controlling the tracking antenna
 
-#### Calculator Module
+### Calculator Module
 *Responsible for*:
 - Provides functions calculating the required tilt and pan position of the tracking antenna given
   latitude, longtiude, altitude values from the plane and gps values of the tracking antenna.
@@ -95,7 +95,7 @@ or maintain.
 - Should not use the global variables defined by the other modules. The functions for the calculation
   should take in the required values as function parameters.
 
-#### Main Module
+### Main Module
 Starting point of the application. Should be relatively short.
 The only logic stored here should be for calling the intialization functions
 for all the sensors, the network, calling the parsing functions for the modules,
