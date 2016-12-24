@@ -10,12 +10,12 @@ void setup(){
 
 void loop(){
     if(parsePacket()){
-      
-    }
-    Serial.println(network_data.alt);
+      //using serial.println instead of debug() since debug takes a string as parameter
+      Serial.println(network_data.alt);
       Serial.println(network_data.lon);
       Serial.println(network_data.lat);
+    }
    
     renewNetwork();
+    delay(1000);
 }
-

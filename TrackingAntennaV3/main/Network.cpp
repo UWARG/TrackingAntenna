@@ -62,8 +62,8 @@ bool parsePacket(void){
     int lines_read = 0;
     char data_buffer[64]; //nothing we read will be larger than 64 bytes
 
-    if(!client.available()){ //if no new data available, don't do anything
-      return 0;
+    if(client.available() == 0){
+      return false;
     }
 
     while(client.available()) {
@@ -87,7 +87,7 @@ bool parsePacket(void){
         } else if (c == '\n') { //we've reached the end of the packet, break out of the loop
             buffer_counter = 0;
             lines_read = 0;
-            return;
+            break;
         } else if (c == 0) { //if we read the null character, ignore it
             buffer_counter++;
         } else {
@@ -96,7 +96,7 @@ bool parsePacket(void){
         }
     }
     
-    return 1;
+    return true;
 }
 
 void renewNetwork(){
