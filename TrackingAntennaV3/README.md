@@ -102,5 +102,5 @@ for all the sensors, the network, calling the parsing functions for the modules,
 and calling the calculation logic functions.
 
 *Notes*:
-- This is the only module that is allowed to use the global variables defined in the other modules.
+- **This is the only module that is allowed to use the global variables defined in the other modules.**
 
