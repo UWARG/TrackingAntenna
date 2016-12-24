@@ -17,14 +17,14 @@
 #define BAUD_RATE 9600
 
 /*
-* Initializes serial interface for displaying debug messages
-*/
+ * Initializes serial interface for displaying debug messages
+ */
 void initDebug(void);
 
 /**
-* Display a message to through the serial line
-* Only works if debug messages have been turned on
-*/
+ * Display a message to through the serial line
+ * Only works if debug messages have been turned on
+ */
 void debug(const char* message);
 
 

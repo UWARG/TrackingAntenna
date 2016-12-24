@@ -14,10 +14,10 @@
 
 #include "Util.hpp"
 
- void ipToString(const IPAddress* ip, char* string){
- 	byte oct1 = (*ip)[0];
- 	byte oct2 = (*ip)[1];
- 	byte oct3 = (*ip)[2];
- 	byte oct4 = (*ip)[3]; 
- 	sprintf(string, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
- }
+void ipToString(const IPAddress* ip, char* string){
+    byte oct1 = (*ip)[0];
+    byte oct2 = (*ip)[1];
+    byte oct3 = (*ip)[2];
+    byte oct4 = (*ip)[3];
+    sprintf(string, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
+}
