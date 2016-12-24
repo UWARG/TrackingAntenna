@@ -120,5 +120,7 @@ and calling the calculation logic functions.
 
 ## Naming Convention
 `CAPITAL_SNAKE_CASE` for #define constants
+
 `regular_snake_case` for variables
+
 `camelCase()` for functions
