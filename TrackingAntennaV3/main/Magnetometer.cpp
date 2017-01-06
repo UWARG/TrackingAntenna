@@ -1,10 +1,13 @@
-#include "Network.hpp"
+/**
+ * @file   Magnetometer.cpp
+ * @Author Michael Lenover (WARG)
+ * @date   January 6, 2017
+ */
+
 #include "Logger.hpp"
 #include "Magnetometer.hpp"
-#include <Adafruit_Sensor.h>
 #include <Adafruit_LSM303_U.h>
 #include <MatrixMath.h>
-#include <Wire.h>
 
 //Create magnetometer object
 Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
@@ -14,16 +17,16 @@ sensors_event_t magEvent;
 
 //Initialize magnetometer
 void initMagnetometer(){
-
+  
   //Enables auto-range
-	mag.enableAutoRange(true);
-
+  mag.enableAutoRange(true);
+  
   //Initializes magnetomer
-	if(!mag.begin()){
+  if(!mag.begin()){
       //If initialization fails, send error message
     	error("Compass failed to be detected.");
   }
-
+  
   else{
     info("Magnetometer initialized.");
   }
@@ -31,20 +34,20 @@ void initMagnetometer(){
 
 
 //Retrieves and calibrates magnetic north from magentometer
-void getMagneticNorth(float mag_north_comp[]){
-
+void getMagneticNorth(float *mag_north_comp){
+  
   //Get magnetic north from magnetometer
   mag.getEvent(&magEvent);
-
+  
   //Assign raw magnetic north data to array
   mag_north_comp[0] = magEvent.magnetic.x;
   mag_north_comp[1] = magEvent.magnetic.y;
   mag_north_comp[2] = magEvent.magnetic.z;
-
-  #if CalibrateMagnetometer
+  
+  #if CalibrateMagnetometer //**MAY BE REMOVED IN FUTURE**
   //Create temporary array for partially calibrated magnetometer data
   float raw_minus_bias[3];
-  
+
   //Define soft iron transform matrix for calibration
   float soft_iron_transform[3][3];
   
