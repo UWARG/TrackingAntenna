@@ -1,0 +1,9 @@
+[submodule "TrackingAntennaV3/libraries/Adafruit_Sensor"]
+	path = TrackingAntennaV3/libraries/Adafruit_Sensor
+	url = https://github.com/adafruit/Adafruit_Sensor.git
+[submodule "TrackingAntennaV3/libraries/Adafruit_LSM303DLHC"]
+	path = TrackingAntennaV3/libraries/Adafruit_LSM303DLHC
+	url = https://github.com/adafruit/Adafruit_LSM303DLHC.git
+[submodule "TrackingAntennaV3/libraries/MatrixMath"]
+	path = TrackingAntennaV3/libraries/MatrixMath
+	url = https://github.com/codebendercc/MatrixMath.git
