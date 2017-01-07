@@ -16,7 +16,7 @@ before adding user interactivity to it.
 ## Installation
 For everything to compile you need to copy everything that is in the `libraries` folder
 into the library folder that the Arduino IDE will recognize. This is either the
-`My Documents/Arduino/libraries` folder on window, or you can also put it in the
+`My Documents/Arduino/libraries` folder on Windows, or you can also put it in the
 `libraries` folder in the arduino ide installation directory (for both Windows and Linux).
 
 After cloning the repo, run `git submodule update --init --recursive` to pull in all the submodules.
