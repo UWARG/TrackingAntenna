@@ -29,6 +29,22 @@
 #define TILT_SERVO_PIN 5
 
 /**
+ * The offset angle between the actual tilt angle of the tracking antenna
+ * and the angle that the servo is at. This needs to be customized for the servo.
+ * For example, when the servo is at 90 degrees, the tracking antenna tilt may
+ * not necessarily be at 90 degrees. This offset accounts for that.
+ */
+#define TILT_ANGLE_OFFSET 0
+
+/**
+ * Because we'll never actually want the tracking antenna pointing all the
+ * way down or up, this places a software limit on how low/high the tracking antenna can tilt
+ * In degrees.
+ */
+#define TILT_ANGLE_MIN_LIMIT 50
+#define TILT_ANGLE_MAX_LIMIT 160
+
+/**
  * Initialize the servos. Need to be called before the pan and tilt functions are used
  */
 void initializeServos(void);
