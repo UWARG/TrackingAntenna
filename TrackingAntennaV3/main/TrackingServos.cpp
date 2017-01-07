@@ -9,6 +9,8 @@
 static Servo pan_servo;
 static Servo tilt_servo;
 
+static int normalizeAngle(int degrees);
+
 void initializeServos(void){
     pan_servo.attach(PAN_SERVO_PIN, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
     tilt_servo.attach(TILT_SERVO_PIN, TILT_SERVO_PWM_MIN, TILT_SERVO_PWM_MAX);
