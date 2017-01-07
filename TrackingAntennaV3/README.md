@@ -19,6 +19,8 @@ into the library folder that the Arduino IDE will recognize. This is either the
 `My Documents/Arduino/libraries` folder on window, or you can also put it in the
 `libraries` folder in the arduino ide installation directory (for both Windows and Linux).
 
+After cloning the repo, run `git submodule update --init --recursive` to pull in all the submodules.
+
 ### Network Module
 *Responsible for*:
 - Connecting to the router through the ethernet shield
