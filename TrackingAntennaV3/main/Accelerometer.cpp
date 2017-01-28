@@ -7,6 +7,7 @@
 #include "Logger.hpp"
 #include "Accelerometer.hpp"
 #include <Adafruit_LSM303_U.h>
+#include <Math.h>
 
 //Create accelerometer object
 static Adafruit_LSM303_Accel_Unified accel;
@@ -15,7 +16,7 @@ static Adafruit_LSM303_Accel_Unified accel;
 static sensors_event_t accelEvent;
 
 //Initializes accelerometer struct
-volatile Accelerometer accelerometer;
+extern volatile Accelerometer accelerometer;
 
 //Initializes accelerometer
 void initAccelerometer(){
@@ -23,19 +24,19 @@ void initAccelerometer(){
  accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID);
 
  //Initializes accelerometer
- if(!accel.begin()){
-   error("\nAccelerometer failed to be detected.");
+  if(!accel.begin()){
+    error("\nAccelerometer failed to be detected.");
  }
 }
 
 //Retrieves accelerometer data
 void getGravity(float *pNegGravity){
- //Gets accelerometer event data
- accel.getEvent(&accelEvent);
+  //Gets accelerometer event data
+  accel.getEvent(&accelEvent);
  
- //Assigns data to accelerometer struct variables
- accelerometer.x = accelEvent.acceleration.x;
- accelerometer.y = accelEvent.acceleration.y;
- accelerometer.z = accelEvent.acceleration.z;
+  //Assigns data to accelerometer struct variables
+  accelerometer.x = accelEvent.acceleration.x;
+  accelerometer.y = accelEvent.acceleration.y;
+  accelerometer.z = accelEvent.acceleration.z;
 }
 
