@@ -12,9 +12,11 @@
 #ifndef MAGNETOMETER
 #define MAGNETOMETER
 
-
-//Arbirtrary ID used to identify sensor if additional sensors are added
-#define COMPASS_ID 12345
+/**
+Arbirtrary ID used to identify sensor if additional sensors are added
+Required for Adafruit library
+*/
+#define MAGNETOMETER_ID 12345
 
 #define CALIBRATE_MAGNETOMETER false
 
@@ -26,10 +28,19 @@ typedef struct {
   float angle;
 } MagnetometerData;
 
-extern volatile MagnetometerData magnetometer_data;
+extern MagnetometerData mag_data;
 
+/**
+ * Initializes magnetometer
+ * Outputs debug messages if unable to connect or initialize
+ */
 bool initMagnetometer();
 
+/**
+ * Retrieves magnetic field value from magnetometer 
+ * Used to determine direction of magnetic north
+ * Values in micro Teslas for each direction (x,y,z)
+ */
 void getMagneticNorth();
 
 #endif

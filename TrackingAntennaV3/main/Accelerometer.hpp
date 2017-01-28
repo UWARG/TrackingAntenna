@@ -1,5 +1,5 @@
 /**
- * @file   Magnetometer.hpp
+ * @file   Accelerometer.hpp
  * @Author Michael Lenover (WARG)
  * @date   January 25, 2017
  * @brief  Accelerometer initialization and data aquisition functions.
@@ -15,25 +15,38 @@
 #ifndef ACCELEROMETER
 #define ACCELEROMETER
 
-//Arbirtrary ID used to identify sensor if additional sensors are added
-#define COMPASS_ID 12345
+/**
+Arbirtrary ID used to identify sensor if additional sensors are added
+Required for Adafruit library
+*/
+#define ACCELEROMETER_ID 12345
 
 /**
  * Accelerometer data struct 
  * Contains x,y,z components of vector pointing in direction of gravity
+ * Units...
  */
-
 typedef struct {
   float x;
   float y;
   float z;
 } AccelerometerData;
 
-extern volatile AccelerometerData accelerometer_data;
+extern AccelerometerData accel_data;
 
-bool initAccelerometer();
+/**
+ * Initializes accelerometer
+ * Outputs debug messages if unable to connect or initialize
+ */
+bool initAccelerometer(void);//Comment
 
-void getGravity();
+
+/**
+ * Retrieves acceleration value from accelerometer 
+ * Used to determine direction of gravity
+ * Values in m/s^2 for each direction (x,y,z)
+ */
+void parseAcceleration();
 
 #endif
 

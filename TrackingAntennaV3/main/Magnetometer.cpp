@@ -3,57 +3,37 @@
 #include "Util.hpp"
 #include <Adafruit_LSM303_U.h>
 #include <MatrixMath.h> //Used for magnetometer calibration
-#include <Math.h>
+#include <Math.h> //Used for angle calculation in getMagneticNorth()
 
 //Create magnetometer object
-static Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
+static Adafruit_LSM303_Mag_Unified mag;
+
+//Declare magnetometer event variable
+sensors_event_t magEvent;
+
 
 //Initializes magnetometer struct
-volatile MagnetometerData magnetometer_data;
-sensors_event_t magEvent;
+MagnetometerData magnetometer_data;
 
 //Initialize magnetometer
 bool initMagnetometer(){
   //Defines mag object based on compass id
-  mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
+  mag = Adafruit_LSM303_Mag_Unified(MAGNETOMETER_ID);
   
   //Enables auto-range
   mag.enableAutoRange(true);
   
   //Initializes magnetometer
-  //Initializes magnetomer
   if(!mag.begin()){
       //If initialization fails, send error message
       error("Compass failed to be detected.");
       return 0;
   }
   return 1;
+  info("Compass initialized succesfully");
 }
 
-//Retrieves and calibrates magnetic north from magentometer
-void getMagneticNorth(){
-  
-  //Initialize temporary variable for vector storage
-  float mag_north_comp[3];
-  
-  //Get magnetic north from magnetometer
-  mag.getEvent(&magEvent);
-  
-  //Assign raw magnetic north data to array
-  mag_north_comp[0] = magEvent.magnetic.x;
-  mag_north_comp[1] = magEvent.magnetic.y;
-  mag_north_comp[2] = magEvent.magnetic.z;
-  
-  #if CalibrateMagnetometer //**MAY BE REMOVED IN FUTURE**
-  calibrateMagnetometer(*mag_north_comp);
-  #endif
-  
-  magnetometer_data.x = mag_north_comp[0];
-  magnetometer_data.y = mag_north_comp[1];
-  magnetometer_data.z = mag_north_comp[2];
-  magnetometer_data.angle = atan2(magnetometer_data.y, magnetometer_data.x);
-}
-
+//Calibrate magnetometer values to compensate for soft iron in tracking antenna
 void calibrateMagnetometer(float *mag_north_comp){
   //Create temporary array for partially calibrated magnetometer data
   float raw_minus_bias[3];
@@ -82,5 +62,29 @@ void calibrateMagnetometer(float *mag_north_comp){
   //Calibrate magnetic north data
   Matrix.Subtract((float*)mag_north_comp, (float*)bias_vec, 3, 1, (float*)raw_minus_bias);
   Matrix.Multiply((float*)soft_iron_transform, (float*)raw_minus_bias, 3, 3, 1, (float*)mag_north_comp);
+}
+
+//Retrieves magnetic north vector from magentometer. Values in micro Teslas for each direction.
+void getMagneticNorth(){
+  static float mag_north_comp[3];
+  //Initialize temporary variable for vector storage
+  
+  
+  //Get magnetic north from magnetometer
+  mag.getEvent(&magEvent);
+  
+  //Assign raw magnetic north data to array
+  mag_north_comp[0] = magEvent.magnetic.x;
+  mag_north_comp[1] = magEvent.magnetic.y;
+  mag_north_comp[2] = magEvent.magnetic.z;
+  
+  #if CALIBRATE_MAGNETOMETER //**MAY BE REMOVED IN FUTURE**
+  calibrateMagnetometer(*mag_north_comp);
+  #endif
+  
+  mag_data.x = mag_north_comp[0];
+  mag_data.y = mag_north_comp[1];
+  mag_data.z = mag_north_comp[2];
+  mag_data.angle = atan2(mag_data.y, mag_data.x);
 }
 
