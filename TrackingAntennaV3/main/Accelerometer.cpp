@@ -7,7 +7,6 @@
 #include "Logger.hpp"
 #include "Accelerometer.hpp"
 #include <Adafruit_LSM303_U.h>
-#include <Math.h>
 
 //Create accelerometer object
 static Adafruit_LSM303_Accel_Unified accel;
@@ -18,18 +17,18 @@ static sensors_event_t accelEvent;
 //Initializes accelerometer struct
 AccelerometerData accel_data;
 
-//Initializes accelerometer
+//Initializes accelerometer. Returns true if successfully connected, false otherwise
 bool initAccelerometer(){
- //Defines accel object based on compass id
- accel = Adafruit_LSM303_Accel_Unified(ACCELEROMETER_ID);
-
- //Initializes accelerometer
+  //Defines accel object based on compass id
+  accel = Adafruit_LSM303_Accel_Unified(ACCELEROMETER_ID);
+  
+  //Initializes accelerometer
   if(!accel.begin()){
     error("Accelerometer failed to be detected.");
-    return 0;
- }
- return 1;
- debug("Accelerometer initialized succesfully");
+    return false;
+  }
+  debug("Accelerometer initialized successfully");
+  return true;
 }
 
 //Retrieves accelerometer data. Values in m/s^2 for each direction

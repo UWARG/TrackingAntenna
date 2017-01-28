@@ -16,15 +16,16 @@
 #define ACCELEROMETER
 
 /**
-Arbirtrary ID used to identify sensor if additional sensors are added
-Required for Adafruit library
-*/
+  * Arbirtrary ID used to identify sensor if additional sensors are added
+  * Required for Adafruit library
+  * Returns true if successfully connected, false otherwise
+  */
 #define ACCELEROMETER_ID 12345
 
 /**
  * Accelerometer data struct 
  * Contains x,y,z components of vector pointing in direction of gravity
- * Units...
+ * Units in m/s^2
  */
 typedef struct {
   float x;

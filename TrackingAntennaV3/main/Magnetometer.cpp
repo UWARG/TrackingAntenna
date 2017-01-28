@@ -1,3 +1,9 @@
+/**
+ * @file   Magnetometer.cpp
+ * @Author Michael Lenover (WARG)
+ * @date   January 5, 2017
+ */
+
 #include "Logger.hpp"
 #include "Magnetometer.hpp"
 #include "Util.hpp"
@@ -9,13 +15,13 @@
 static Adafruit_LSM303_Mag_Unified mag;
 
 //Declare magnetometer event variable
-sensors_event_t magEvent;
+static sensors_event_t magEvent;
 
 
 //Initializes magnetometer struct
-MagnetometerData magnetometer_data;
+MagnetometerData mag_data;
 
-//Initialize magnetometer
+//Initialize magnetometer. Returns true if successful, false otherwise
 bool initMagnetometer(){
   //Defines mag object based on compass id
   mag = Adafruit_LSM303_Mag_Unified(MAGNETOMETER_ID);
@@ -25,12 +31,12 @@ bool initMagnetometer(){
   
   //Initializes magnetometer
   if(!mag.begin()){
-      //If initialization fails, send error message
-      error("Compass failed to be detected.");
-      return 0;
+    //If initialization fails, send error message
+    error("Compass failed to be detected.");
+    return false;
   }
-  return 1;
-  info("Compass initialized succesfully");
+  info("Compass initialized successfully");
+  return true;
 }
 
 //Calibrate magnetometer values to compensate for soft iron in tracking antenna
