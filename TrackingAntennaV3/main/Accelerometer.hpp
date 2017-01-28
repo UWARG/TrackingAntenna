@@ -4,17 +4,24 @@
  * @date   January 25, 2017
  * @brief  Accelerometer initialization and data aquisition functions.
  * Uses Adafruit LSM303 Unified Acceleromter/Magnetometer for accelerometer data.
+<<<<<<< HEAD
  * Connects to Arduino using I2C communication
  * Connect pin SDA on accelerometer to pin 20
  * Connect pin SCL on accelerometer to pin 21
  * Connect power to 3.3V, ground to ground
  * @see https://www.arduino.cc/en/Reference/Wire
+=======
+>>>>>>> origin/Accelerometer
  * @see https://www.adafruit.com/product/1120
  */
 
 #ifndef ACCELEROMETER
 #define ACCELEROMETER
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin/Accelerometer
 //Arbirtrary ID used to identify sensor if additional sensors are added
 #define COMPASS_ID 12345
 
