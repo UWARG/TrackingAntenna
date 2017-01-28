@@ -10,13 +10,13 @@
 #include <Math.h>
 
 //Create accelerometer object
-static Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
+static Adafruit_LSM303_Accel_Unified accel = Adafruit_LSM303_Accel_Unified(COMPASS_ID);
 
 //Declare accelerometer event variable
 static sensors_event_t accelEvent;
 
 //Initializes accelerometer struct
-extern volatile AccelerometerData accelerometerData;
+volatile AccelerometerData accelerometer_data;
 
 //Initializes accelerometer
 bool initAccelerometer(){
@@ -31,13 +31,13 @@ bool initAccelerometer(){
  return 1;
 }
 
-//Retrieves accelerometer data
+//Retrieves accelerometer data. Values range from -10 to 10 for each vector component.
 void getGravity(){
   //Gets accelerometer event data
   accel.getEvent(&accelEvent);
  
   //Assigns data to accelerometer struct variables
-  accelerometerData.x = accelEvent.acceleration.x;
-  accelerometerData.y = accelEvent.acceleration.y;
-  accelerometerData.z = accelEvent.acceleration.z;
+  accelerometer_data.x = accelEvent.acceleration.x;
+  accelerometer_data.y = accelEvent.acceleration.y;
+  accelerometer_data.z = accelEvent.acceleration.z;
 }

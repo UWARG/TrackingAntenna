@@ -22,13 +22,16 @@
  * Accelerometer data struct 
  * Contains x,y,z components of vector pointing in direction of gravity
  */
+
 typedef struct {
   float x;
   float y;
   float z;
 } AccelerometerData;
 
-void initAccelerometer();
+extern volatile AccelerometerData accelerometer_data;
+
+bool initAccelerometer();
 
 void getGravity();
 

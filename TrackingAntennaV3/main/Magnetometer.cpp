@@ -3,17 +3,17 @@
 #include "Util.hpp"
 #include <Adafruit_LSM303_U.h>
 #include <MatrixMath.h> //Used for magnetometer calibration
-#include <MatrixMath.h>
+#include <Math.h>
 
 //Create magnetometer object
 static Adafruit_LSM303_Mag_Unified mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
 
 //Initializes magnetometer struct
-volatile Magnetometer magnetometer;
+volatile MagnetometerData magnetometer_data;
 sensors_event_t magEvent;
 
 //Initialize magnetometer
-void initMagnetometer(){
+bool initMagnetometer(){
   //Defines mag object based on compass id
   mag = Adafruit_LSM303_Mag_Unified(COMPASS_ID);
   
@@ -25,7 +25,9 @@ void initMagnetometer(){
   if(!mag.begin()){
       //If initialization fails, send error message
       error("Compass failed to be detected.");
+      return 0;
   }
+  return 1;
 }
 
 //Retrieves and calibrates magnetic north from magentometer
@@ -43,6 +45,16 @@ void getMagneticNorth(){
   mag_north_comp[2] = magEvent.magnetic.z;
   
   #if CalibrateMagnetometer //**MAY BE REMOVED IN FUTURE**
+  calibrateMagnetometer(*mag_north_comp);
+  #endif
+  
+  magnetometer_data.x = mag_north_comp[0];
+  magnetometer_data.y = mag_north_comp[1];
+  magnetometer_data.z = mag_north_comp[2];
+  magnetometer_data.angle = atan2(magnetometer_data.y, magnetometer_data.x);
+}
+
+void calibrateMagnetometer(float *mag_north_comp){
   //Create temporary array for partially calibrated magnetometer data
   float raw_minus_bias[3];
 
@@ -70,7 +82,5 @@ void getMagneticNorth(){
   //Calibrate magnetic north data
   Matrix.Subtract((float*)mag_north_comp, (float*)bias_vec, 3, 1, (float*)raw_minus_bias);
   Matrix.Multiply((float*)soft_iron_transform, (float*)raw_minus_bias, 3, 3, 1, (float*)mag_north_comp);
-  #endif
-
-  magnetometer.angle = vectorToAngle(magnetometer.x, magnetometer.y);
 }
+

@@ -15,7 +15,6 @@
  */
 
 #include "Util.hpp"
-#include <Math.h>
 
 void ipToString(const IPAddress* ip, char* string){
     byte oct1 = (*ip)[0];
@@ -23,9 +22,5 @@ void ipToString(const IPAddress* ip, char* string){
     byte oct3 = (*ip)[2];
     byte oct4 = (*ip)[3];
     sprintf(string, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
-}
-
-float vectorToAngle(float x, float y){
-  return tan(y / x);
 }
 
