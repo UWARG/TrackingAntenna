@@ -29,7 +29,7 @@ void initAccelerometer(){
 }
 
 //Retrieves accelerometer data
-void getGravity(float *pNegGravity){
+void getGravity(){
  //Gets accelerometer event data
  accel.getEvent(&accelEvent);
  

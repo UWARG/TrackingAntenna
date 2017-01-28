@@ -11,4 +11,6 @@
 
 void ipToString(const IPAddress* ip, char* string);
 
+float vectorToAngle(float x, float y);
+
 #endif
