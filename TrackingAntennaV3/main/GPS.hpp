@@ -7,6 +7,8 @@ typedef struct {
 	float lon;
 } GPSLocation;
 
+extern GPSLocation gps_location;
+
 //Initializes the GPS module at the selected serial pins and baud rate.
 void initGPS();
 
