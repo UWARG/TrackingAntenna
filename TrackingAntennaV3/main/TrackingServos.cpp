@@ -22,9 +22,6 @@ void pan(int degrees){
 }
 
 void tilt(int degrees){
-    degrees = (degrees - 90) / 2 + 90;
-    //degrees = 180 - degrees;
-    
     int norm_angle = normalizeAngle(degrees);
 
     if (norm_angle > TILT_ANGLE_MAX_LIMIT){
@@ -32,6 +29,10 @@ void tilt(int degrees){
     } else if (norm_angle < TILT_ANGLE_MIN_LIMIT){
         norm_angle = TILT_ANGLE_MIN_LIMIT;
     }
+    
+    degrees = (degrees - 90) / 2 + 90;
+    //degrees = 180 - degrees;
+   
     tilt_servo.write(norm_angle + TILT_ANGLE_OFFSET);
 }
 
