@@ -22,8 +22,8 @@ void trackSpike(GPSLocation* antenna_location, NetworkData* plane_location, char
 	plane_vector [1] = plane_location.alt*sin(plane_location.lat)*sin(plane_location.lon);
 	plane_vector [2] = plane_location.alt*cos(plane_location.lat);
 
-	float pan_angle = acos(dot(antenna_vector[0], antenna_vector[1], plane_vector[0], plane_vector[1])/(magnitude(antenna_vector[0], antenna_vector[1])*magnitude(plane_vector[0], plane_vector[1])))*57.2958;
-	float tilt_angle = acos(dot(antenna_vector[1], antenna_vector[2], plane_vector[1], plane_vector[2])/(magnitude(antenna_vector[1], antenna_vector[2)*magnitude(plane_vector[1], plane_vector[2])))*57.2958;
+	float pan_angle = acos(dotProduct(antenna_vector[0], antenna_vector[1], plane_vector[0], plane_vector[1])/(magnitude(antenna_vector[0], antenna_vector[1])*magnitude(plane_vector[0], plane_vector[1])))*57.2958;
+	float tilt_angle = acos(dotProduct(antenna_vector[1], antenna_vector[2], plane_vector[1], plane_vector[2])/(magnitude(antenna_vector[1], antenna_vector[2)*magnitude(plane_vector[1], plane_vector[2])))*57.2958;
 
 	switch (orientation){
 		case 1:
