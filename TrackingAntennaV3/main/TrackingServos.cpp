@@ -21,6 +21,7 @@ void pan(int degrees){
 }
 
 void tilt(int degrees){
+    
     int norm_angle = normalizeAngle(degrees);
 
     if (norm_angle > TILT_ANGLE_MAX_LIMIT){
@@ -33,8 +34,11 @@ void tilt(int degrees){
 
 /**
  * Simple normalization of the degree angle (caps at 0 and 180 respectively)
+ * Subtracts input variable from 180 degrees
  */
 static int normalizeAngle(int degrees){
+    degrees = 180 - degrees;
+    degrees = (degrees - 90) / 2.1 + 90;
     if(degrees < 0){
         return 0;
     } else if (degrees > 180){

@@ -39,7 +39,7 @@ extern AccelerometerData accel_data;
  * Initializes accelerometer
  * Outputs debug messages if unable to connect or initialize
  */
-bool initAccelerometer(void);//Comment
+bool initAccelerometer(void);
 
 
 /**

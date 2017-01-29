@@ -1,26 +1,22 @@
-#include "Logger.hpp  "
-#include "Network.hpp"
+#include "Logger.hpp"
+#include "TrackingServos.hpp"
 #include "Accelerometer.hpp"
 #include "Magnetometer.hpp"
+#include "TrackingServos.hpp"
+#include "Math.h"
 
 void setup(){
     initDebug();
     info("Starting up...");
-
-    initNetwork();
-    initDebug();
+    initializeServos();
     initMagnetometer();
     initAccelerometer();
 }
 
 void loop(){
-    if(parsePacket()){
-      //using serial.println instead of debug() since debug takes a string as parameter
-      Serial.println(network_data.alt);
-      Serial.println(network_data.lon);
-      Serial.println(network_data.lat);
-    }
-   
-    renewNetwork(); 
+    tilt(140);
+    ///pan(0);
+    parseAcceleration();
+    Serial.println((360/(2*PI))*atan2(accel_data.x, accel_data.z));
     delay(100);
 }

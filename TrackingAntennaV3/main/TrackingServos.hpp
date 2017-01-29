@@ -14,10 +14,10 @@
  * The closer these values are to the actual values of the servo, the more accuratly we can position the servos.
  * The arduino defaults are 544 and 2400 respectively
  */
-#define PAN_SERVO_PWM_MIN 544
-#define PAN_SERVO_PWM_MAX 2400
-#define TILT_SERVO_PWM_MIN 544
-#define TILT_SERVO_PWM_MAX 2400
+#define PAN_SERVO_PWM_MIN 1556
+#define PAN_SERVO_PWM_MAX 1669
+#define TILT_SERVO_PWM_MIN 1500
+#define TILT_SERVO_PWM_MAX 1550
 
 /**
  * The actual pins the servo's are connected to. Note that on the MEGA you can use pretty much
