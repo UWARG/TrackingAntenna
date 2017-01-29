@@ -1,10 +1,10 @@
 #include "Calculator.hpp"
+#include "Util.hpp"
 #incldue <math.h>
 
-void initialize(){
-	//get compass reading, if facing north then when plane lon < antenna point left, if south reverse. If east when plane lat > antenna lat point left, reverse for west
-	//1 is north, 2 is south, ect.
-}
+// void initialize(){
+	
+// }
 //This module is shit and a better solution should be created.
 //East and North are positive
 void trackSpike(GPSLocation* antenna_location, NetworkData* plane_location, char orientation){
