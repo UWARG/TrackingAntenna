@@ -1,6 +1,6 @@
 /**
  * @file   Util.cpp
- * @Author Serj Babayan (WARG)
+ * @Authors Serj Babayan (WARG)
  * @date   December 22, 2016
  */
 
@@ -21,3 +21,4 @@ void ipToString(const IPAddress* ip, char* string){
     byte oct4 = (*ip)[3];
     sprintf(string, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
 }
+

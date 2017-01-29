@@ -1,11 +1,16 @@
-#include "Logger.hpp"
+#include "Logger.hpp  "
 #include "Network.hpp"
+#include "Accelerometer.hpp"
+#include "Magnetometer.hpp"
 
 void setup(){
     initDebug();
     info("Starting up...");
 
     initNetwork();
+    initDebug();
+    initMagnetometer();
+    initAccelerometer();
 }
 
 void loop(){
@@ -16,6 +21,6 @@ void loop(){
       Serial.println(network_data.lat);
     }
    
-    renewNetwork();
-    delay(1000);
+    renewNetwork(); 
+    delay(100);
 }
