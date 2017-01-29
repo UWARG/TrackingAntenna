@@ -17,10 +17,13 @@ void initializeServos(void){
 }
 
 void pan(int degrees){
+    degrees = (degrees - 90) / 10 + 90;
     pan_servo.write(normalizeAngle(degrees));
 }
 
 void tilt(int degrees){
+    degrees = (degrees - 90) / 2 + 90;
+    //degrees = 180 - degrees;
     
     int norm_angle = normalizeAngle(degrees);
 
@@ -37,8 +40,6 @@ void tilt(int degrees){
  * Subtracts input variable from 180 degrees
  */
 static int normalizeAngle(int degrees){
-    degrees = 180 - degrees;
-    degrees = (degrees - 90) / 2.1 + 90;
     if(degrees < 0){
         return 0;
     } else if (degrees > 180){
