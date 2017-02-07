@@ -1,12 +1,25 @@
-#include "Logger.hpp"
+#include "Logger.hpp  "
 #include "Network.hpp"
+<<<<<<< HEAD
 #include "GPS.hpp"
+=======
+#include "Accelerometer.hpp"
+#include "Magnetometer.hpp"
+>>>>>>> refs/remotes/origin/master
 
 void setup(){
     initDebug();
     info("Starting up...");
+<<<<<<< HEAD
     initGPS();
     //initNetwork();
+=======
+
+    initNetwork();
+    initDebug();
+    initMagnetometer();
+    initAccelerometer();
+>>>>>>> refs/remotes/origin/master
 }
 
 void loop(){
@@ -17,6 +30,7 @@ void loop(){
       Serial.println(network_data.lon);
       Serial.println(network_data.lat);
     }
+<<<<<<< HEAD
     renewNetwork();
     */
     parseGPS();
@@ -27,5 +41,9 @@ void loop(){
     Serial.print(" ");
     Serial.println(gps_location.alt);
     
+=======
+   
+    renewNetwork(); 
+>>>>>>> refs/remotes/origin/master
     delay(100);
 }
