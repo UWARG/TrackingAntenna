@@ -1,59 +1,40 @@
+/**
+ * @file   Calculator.cpp
+ * @Author Mark Dunk (WARG)
+ * @date   March 15, 2017
+ */
+
 #include "Calculator.hpp"
 #include "Util.hpp"
 #incldue <math.h>
 
-// void initialize(){
+volatile TrackingAngles tracking_angles;
+
+void trackSpike(GPSLocation* antenna_location, NetworkData* plane_location, MagnetometerData* orientation){
 	
-// }
-//This module is shit and a better solution should be created.
-//East and North are positive
-void trackSpike(GPSLocation* antenna_location, NetworkData* plane_location, char orientation){
-	float antenna_vector [3];
-	float plane_vector [3];
+	long double lat_dif = (plane_location.lat - antenna_location.lat) * M_PI / 180; //Distance in latitude points converted to radians.
+	long double lon_dif = (plane_location.lon - antenna_location.lon) * M_PI / 180; //Distance in longitude points converted to radians.
+	long double alt_dif = plane_location.alt - antenna_location.alt;	//Difference in altitude in meters.
+	
+	//Modified Haversine fuction. Takes in the fifference in latitude or longitude of the plane and the ground station. Outputs the spherical distance between the two points in East-West and North-South directions.
+	long double lat_dist = EARTH_RADIUS * 2 * asin(sqrt(sin(lat_dif / 2) * sin(lat_dif / 2)));
+	long double lon_dist = EARTH_RADIUS * 2 * asin(sqrt(cos(Lat1 * M_PI / 180) * cos(Lat2 * M_PI / 180) * sin(lon_dif / 2) * sin(lon_dif / 2)));
+	
+	long double tot_dist = sqrt((lat_dist*lat_dist) + (lon_dist*lon_dist)); //The actual spherical distance between the plane and the ground station.
 
-	antenna_location.alt += 6371000;
-	plane_location.alt += 6371000;
 
-	antenna_vector [0] = antenna_location.alt*sin(antenna_location.lat)*cos(antenna_location.lon);
-	antenna_vector [1] = antenna_location.alt*sin(antenna_location.lat)*sin(antenna_location.lon);
-	antenna_vector [2] = antenna_location.alt*cos(antenna_location.lat);
 
-	plane_vector [0] = plane_location.alt*sin(plane_location.lat)*cos(plane_location.lon);
-	plane_vector [1] = plane_location.alt*sin(plane_location.lat)*sin(plane_location.lon);
-	plane_vector [2] = plane_location.alt*cos(plane_location.lat);
-
-	float pan_angle = acos(dotProduct(antenna_vector[0], antenna_vector[1], plane_vector[0], plane_vector[1])/(magnitude(antenna_vector[0], antenna_vector[1])*magnitude(plane_vector[0], plane_vector[1])))*57.2958;
-	float tilt_angle = acos(dotProduct(antenna_vector[1], antenna_vector[2], plane_vector[1], plane_vector[2])/(magnitude(antenna_vector[1], antenna_vector[2)*magnitude(plane_vector[1], plane_vector[2])))*57.2958;
-
-	switch (orientation){
-		case 1:
-			if (antenna_location.lon < plane_location.lon){
-				pan_angle += 90;
-			}
-			break;
-
-		case 2:
-			if (antenna_location.lon > plane_location.lon){
-				pan_angle += 90;
-			}
-			break;
-
-		case 3:
-			if (antenna_location.lat > plane_location.lat){
-				pan_angle += 90;
-			}
-			break;
-
-		case 4:
-			if (antenna_location.lat < plane_location.lat){
-				pan_angle += 90;
-			}
-			break;
+	if(antenna_location.lon > plane_location.lon){
+	    lon_dist = lon_dist * -1;
 	}
 
-	if (plane_location.alt > antenna_location.alt){
-		tilt_angle += 90;
+	if(antenna_location.lat > plane_location.lat){
+	    lat_dist = lat_dist * -1;
 	}
+
+	tracking_angles.pan = derees(atan2(lon_dist,lat_dist)) - orientation.angle;
+
+	tracking_angles.tilt = degrees(atan(alt_dif, tot_dist));
 
 
 }	
