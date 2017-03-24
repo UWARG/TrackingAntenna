@@ -3,13 +3,12 @@
  * @Author Serj Babayan (WARG)
  * @date   January 7, 2017
  */
+#include "Arduino.h"
 #include "TrackingServos.hpp"
 #include <Servo.h>
 
 static Servo pan_servo;
 static Servo tilt_servo;
-
-static int normalizeAngle(int degrees);
 
 void initializeServos(void){
     pan_servo.attach(PAN_SERVO_PIN, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
@@ -17,34 +16,14 @@ void initializeServos(void){
 }
 
 void pan(int degrees){
-    degrees = (degrees - 90) / 10 + 90;
-    pan_servo.write(normalizeAngle(degrees));
+    int output = map(degrees, -90, 90, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
+    pan_servo.writeMicroseconds(output);
 }
 
 void tilt(int degrees){
-    int norm_angle = normalizeAngle(degrees);
+    degrees = constrain(degrees, TILT_ANGLE_MIN_LIMIT, TILT_ANGLE_MAX_LIMIT);
 
-    if (norm_angle > TILT_ANGLE_MAX_LIMIT){
-        norm_angle = TILT_ANGLE_MAX_LIMIT;
-    } else if (norm_angle < TILT_ANGLE_MIN_LIMIT){
-        norm_angle = TILT_ANGLE_MIN_LIMIT;
-    }
-    
-    degrees = (degrees - 90) / 2 + 90;
-    //degrees = 180 - degrees;
-   
-    tilt_servo.write(norm_angle + TILT_ANGLE_OFFSET);
+    int output = map(degrees, 90, 180, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN); // reversed on purpose
+    tilt_servo.writeMicroseconds(output);
 }
 
-/**
- * Simple normalization of the degree angle (caps at 0 and 180 respectively)
- * Subtracts input variable from 180 degrees
- */
-static int normalizeAngle(int degrees){
-    if(degrees < 0){
-        return 0;
-    } else if (degrees > 180){
-        return 180;
-    }
-    return degrees;
-}

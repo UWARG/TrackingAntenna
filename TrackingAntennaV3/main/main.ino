@@ -14,8 +14,8 @@ void setup(){
 }
 
 void loop(){
-    tilt(120);
-    pan(90);
+    tilt(0);
+    pan(0);
     parseAcceleration();
     Serial.println((360/(2*PI))*atan2(accel_data.x, accel_data.z));
     delay(100);

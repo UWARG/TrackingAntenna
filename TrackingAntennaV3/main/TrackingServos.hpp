@@ -14,10 +14,10 @@
  * The closer these values are to the actual values of the servo, the more accuratly we can position the servos.
  * The arduino defaults are 544 and 2400 respectively
  */
-#define PAN_SERVO_PWM_MIN 1770
-#define PAN_SERVO_PWM_MAX 2000
-#define TILT_SERVO_PWM_MIN 1400
-#define TILT_SERVO_PWM_MAX 1900
+#define PAN_SERVO_PWM_MIN 1515
+#define PAN_SERVO_PWM_MAX 1625
+#define TILT_SERVO_PWM_MIN 1775
+#define TILT_SERVO_PWM_MAX 2150
 
 /**
  * The actual pins the servo's are connected to. Note that on the MEGA you can use pretty much
@@ -25,8 +25,8 @@
  * note that pins 2 and 3 can also be used for interrupts, so its better to reserve those pins for
  * future use.
  */
-#define PAN_SERVO_PIN 4
-#define TILT_SERVO_PIN 5
+#define PAN_SERVO_PIN 9
+#define TILT_SERVO_PIN 8
 
 /**
  * The offset angle between the actual tilt angle of the tracking antenna
@@ -34,14 +34,14 @@
  * For example, when the servo is at 90 degrees, the tracking antenna tilt may
  * not necessarily be at 90 degrees. This offset accounts for that.
  */
-#define TILT_ANGLE_OFFSET 10
+#define TILT_ANGLE_OFFSET 0
 
 /**
  * Because we'll never actually want the tracking antenna pointing all the
  * way down or up, this places a software limit on how low/high the tracking antenna can tilt
  * In degrees.
  */
-#define TILT_ANGLE_MIN_LIMIT 80
+#define TILT_ANGLE_MIN_LIMIT 90
 #define TILT_ANGLE_MAX_LIMIT 140
 
 /**

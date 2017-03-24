@@ -18,7 +18,7 @@
 #define DATA_RELAY_IP1 192
 #define DATA_RELAY_IP2 168
 #define DATA_RELAY_IP3 1
-#define DATA_RELAY_IP4 150
+#define DATA_RELAY_IP4 103
 
 /**
  * Data relay header names for altitude, latitude, and longitude
