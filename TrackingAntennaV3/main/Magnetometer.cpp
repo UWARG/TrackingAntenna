@@ -72,9 +72,8 @@ void calibrateMagnetometer(float *mag_north_comp){
 
 //Retrieves magnetic north vector from magentometer. Values in micro Teslas for each direction.
 void getMagneticNorth(){
-  static float mag_north_comp[3];
+  float mag_north_comp[3];
   //Initialize temporary variable for vector storage
-  
   
   //Get magnetic north from magnetometer
   mag.getEvent(&magEvent);

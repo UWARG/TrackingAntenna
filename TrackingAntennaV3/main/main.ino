@@ -17,6 +17,10 @@ void loop(){
     tilt(0);
     pan(0);
     parseAcceleration();
-    Serial.println((360/(2*PI))*atan2(accel_data.x, accel_data.z));
-    delay(100);
+    getMagneticNorth();
+    Serial.print("Pitch: ");  
+    Serial.print((180/PI)*atan2(accel_data.x, accel_data.z));
+    Serial.print(" Heading: ");
+    Serial.println((180/PI)*mag_data.angle);
+    delay(200);
 }
