@@ -41,8 +41,8 @@
  * way down or up, this places a software limit on how low/high the tracking antenna can tilt
  * In degrees.
  */
-#define TILT_ANGLE_MIN_LIMIT 90
-#define TILT_ANGLE_MAX_LIMIT 140
+#define TILT_ANGLE_MIN_LIMIT 0
+#define TILT_ANGLE_MAX_LIMIT 50
 
 /**
  * Initialize the servos. Need to be called before the pan and tilt functions are used

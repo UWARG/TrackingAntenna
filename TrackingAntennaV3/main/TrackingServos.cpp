@@ -23,7 +23,7 @@ void pan(int degrees){
 void tilt(int degrees){
     degrees = constrain(degrees, TILT_ANGLE_MIN_LIMIT, TILT_ANGLE_MAX_LIMIT);
 
-    int output = map(degrees, 90, 180, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN); // reversed on purpose
+    int output = map(degrees, 0, 90, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN); // reversed on purpose
     tilt_servo.writeMicroseconds(output);
 }
 
