@@ -12,7 +12,7 @@
 
 //represents the current state of the altitude, latitude, and longitude
 //defined globally
-volatile NetworkData network_data;
+NetworkData network_data;
 
 //initialize the Ethernet client library
 static EthernetClient client;

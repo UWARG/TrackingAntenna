@@ -17,7 +17,7 @@ void initializeServos(void){
 
 void pan(float deg){
     int tenth_deg = round(deg*10);
-    int output = map(tenth_deg, -1200, 1200, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
+    int output = map(tenth_deg, -PAN_ANGLE_LIMIT, PAN_ANGLE_LIMIT, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
     pan_servo.writeMicroseconds(output);
 }
 

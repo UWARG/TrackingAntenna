@@ -8,11 +8,17 @@
 #ifndef Calculator
 #define Calculator
 
-#define EARTH_RADIUS = 6371000;
+#include "Magnetometer.hpp"
+#include "Network.hpp"
 
-typedef struct{
-	int pan_angle;
-	int tilt_angle;
-}	TrackingAngles;
+#define EARTH_RADIUS ((float)6371000)
 
-void trackSpike(GPSLocation* antenna_location, NetworkData* plane_location, MagnetometerData* orientation);
+typedef struct {
+    float alt;
+    float lat;
+    float lon;
+} GPSLocation;
+
+void trackSpike(GPSLocation antenna_location, NetworkData plane_location);
+
+#endif

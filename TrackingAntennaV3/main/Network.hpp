@@ -18,7 +18,7 @@
 #define DATA_RELAY_IP1 192
 #define DATA_RELAY_IP2 168
 #define DATA_RELAY_IP3 1
-#define DATA_RELAY_IP4 103
+#define DATA_RELAY_IP4 102
 
 /**
  * Data relay header names for altitude, latitude, and longitude
@@ -48,7 +48,7 @@ typedef struct {
  * Includes altitude, longitude, and longitude, which is all we really care about
  * for the tracking antenna.
  */
-extern volatile NetworkData network_data;
+extern NetworkData network_data;
 
 /**
  * Initializes the ethernet connection, attempts to connect to the data relay,

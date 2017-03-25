@@ -21,5 +21,9 @@ void calibrateTilt();
 
 void calibratePan();
 
+
+void worldPan(float heading);
+void worldTilt(float pitch);
+
 #endif
 

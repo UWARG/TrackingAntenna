@@ -40,6 +40,11 @@
 #define TILT_ANGLE_MAX_LIMIT 600
 
 /**
+ * Limit in either direction, in tenth degrees
+ */
+#define PAN_ANGLE_LIMIT 1200
+
+/**
  * Initialize the servos. Need to be called before the pan and tilt functions are used
  */
 void initializeServos(void);

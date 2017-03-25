@@ -5,6 +5,7 @@
  */
 
 #include "Init.hpp"
+#include "Util.hpp"
 #include "Accelerometer.hpp"
 #include "Magnetometer.hpp"
 #include "TrackingServos.hpp"
@@ -42,11 +43,10 @@ void calibrateTilt(){
     delay(50);
   }
   initialize.tilt_max = angle / SAMPLES;
-
 }
 
 void calibratePan() {
-  pan(-120);
+  pan(PAN_ANGLE_LIMIT / -10.f);
 
   delay(5000);
 
@@ -60,7 +60,7 @@ void calibratePan() {
   initialize.heading_min = angle / SAMPLES;
 
   // tilt to max limit
-  pan(120);
+  pan(PAN_ANGLE_LIMIT / 10.f);
 
   delay(5000);
 
@@ -71,6 +71,16 @@ void calibratePan() {
     delay(100);
   }
   initialize.heading_max = angle / SAMPLES;
-
 }
+
+void worldPan(float heading) {
+  float angle = heading + 90.f;//mapf(heading, initialize.heading_min, initialize.heading_max, PAN_ANGLE_LIMIT / -10.f, PAN_ANGLE_LIMIT / 10.f);
+  pan(angle);
+}
+
+void worldTilt(float pitch) {
+  float angle = mapf(pitch, initialize.tilt_min, initialize.tilt_max, TILT_ANGLE_MIN_LIMIT / 10.f, TILT_ANGLE_MAX_LIMIT / 10.f);
+  tilt(angle);
+}
+
 
