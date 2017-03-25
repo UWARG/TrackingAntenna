@@ -15,15 +15,17 @@ void initializeServos(void){
     tilt_servo.attach(TILT_SERVO_PIN, TILT_SERVO_PWM_MIN, TILT_SERVO_PWM_MAX);
 }
 
-void pan(int degrees){
-    int output = map(degrees, -90, 90, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
+void pan(float deg){
+    int tenth_deg = round(deg*10);
+    int output = map(tenth_deg, -1200, 1200, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX);
     pan_servo.writeMicroseconds(output);
 }
 
-void tilt(int degrees){
-    degrees = constrain(degrees, TILT_ANGLE_MIN_LIMIT, TILT_ANGLE_MAX_LIMIT);
+void tilt(float deg){
+    int tenth_deg = round(deg*10);
+    tenth_deg = constrain(tenth_deg, TILT_ANGLE_MIN_LIMIT, TILT_ANGLE_MAX_LIMIT);
 
-    int output = map(degrees, 0, 90, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN); // reversed on purpose
+    int output = map(tenth_deg, 0, 900, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN); // reversed on purpose
     tilt_servo.writeMicroseconds(output);
 }
 

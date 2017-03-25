@@ -3,7 +3,7 @@
 #include "Accelerometer.hpp"
 #include "Magnetometer.hpp"
 #include "TrackingServos.hpp"
-#include "Math.h"
+#include "Init.hpp"
 
 void setup(){
     initDebug();
@@ -11,16 +11,27 @@ void setup(){
     initializeServos();
     initMagnetometer();
     initAccelerometer();
+
+    tilt(0);
+    pan(0);
+
+    calibrateTilt();
+    Serial.print(initialize.tilt_min); Serial.print(" "); Serial.println(initialize.tilt_max);
+
+    delay(500);
+    calibratePan();
+    Serial.print(initialize.heading_min); Serial.print(" "); Serial.println(initialize.heading_max);
 }
 
 void loop(){
+   
     tilt(0);
     pan(0);
-    parseAcceleration();
-    getMagneticNorth();
-    Serial.print("Pitch: ");  
-    Serial.print((180/PI)*atan2(accel_data.x, accel_data.z));
-    Serial.print(" Heading: ");
-    Serial.println((180/PI)*mag_data.angle);
-    delay(200);
+//    parseAcceleration();
+//    getMagneticNorth();
+//    Serial.print("Pitch: ");  
+//    Serial.print(accel_data.pitch);
+//    Serial.print(" Heading: ");
+//    Serial.println(mag_data.heading);
+//    delay(200);
 }

@@ -14,9 +14,12 @@
  * The closer these values are to the actual values of the servo, the more accuratly we can position the servos.
  * The arduino defaults are 544 and 2400 respectively
  */
-#define PAN_SERVO_PWM_MIN 1515
-#define PAN_SERVO_PWM_MAX 1625
-#define TILT_SERVO_PWM_MIN 1775
+
+#define PAN_SERVO_MID 1570
+#define PAN_SERVO_RANGE 70
+#define PAN_SERVO_PWM_MIN PAN_SERVO_MID - PAN_SERVO_RANGE
+#define PAN_SERVO_PWM_MAX PAN_SERVO_MID + PAN_SERVO_RANGE
+#define TILT_SERVO_PWM_MIN 1785
 #define TILT_SERVO_PWM_MAX 2150
 
 /**
@@ -29,20 +32,12 @@
 #define TILT_SERVO_PIN 8
 
 /**
- * The offset angle between the actual tilt angle of the tracking antenna
- * and the angle that the servo is at. This needs to be customized for the servo.
- * For example, when the servo is at 90 degrees, the tracking antenna tilt may
- * not necessarily be at 90 degrees. This offset accounts for that.
- */
-#define TILT_ANGLE_OFFSET 0
-
-/**
  * Because we'll never actually want the tracking antenna pointing all the
  * way down or up, this places a software limit on how low/high the tracking antenna can tilt
- * In degrees.
+ * In tenth degrees.
  */
 #define TILT_ANGLE_MIN_LIMIT 0
-#define TILT_ANGLE_MAX_LIMIT 50
+#define TILT_ANGLE_MAX_LIMIT 600
 
 /**
  * Initialize the servos. Need to be called before the pan and tilt functions are used
@@ -51,14 +46,14 @@ void initializeServos(void);
 
 /**
  * Control the pan of the tracking antenna
- * @param degrees Any integer angle. Will cap the degree at 0 if given less than 0 and cap at 180 if given more than 180
+ * @param deg Desired angle in degrees. (0 is forward, CW is +ve)
  */
-void pan(int degrees);
+void pan(float deg);
 
 /**
  * Control the tilt of the tracking antenna
- * @param degrees Any integer angle in degrees. Will cap the degree at 0 if given less than 0 and cap at 180 if given more than 180
+ * @param deg Desired angle in degrees. (0 is flat, up is +ve)
  */
-void tilt(int degrees);
+void tilt(float deg);
 
 #endif

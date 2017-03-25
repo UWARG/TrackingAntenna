@@ -11,9 +11,15 @@
 #define INIT
 
 typedef struct {
-  float tilt_offset;
+  float tilt_min, tilt_max;
+  float heading_min, heading_max;
 } Init;
 
 extern Init initialize;
+
+void calibrateTilt();
+
+void calibratePan();
+
 #endif
 

@@ -40,4 +40,5 @@ void parseAcceleration(){
   accel_data.x = accelEvent.acceleration.x;
   accel_data.y = accelEvent.acceleration.y;
   accel_data.z = accelEvent.acceleration.z;
+  accel_data.pitch = degrees(atan2(accel_data.x, accel_data.z));
 }

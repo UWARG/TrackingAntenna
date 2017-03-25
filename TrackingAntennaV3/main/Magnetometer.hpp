@@ -25,7 +25,7 @@ typedef struct {
   float x;
   float y;
   float z;
-  float angle;
+  float heading;
 } MagnetometerData;
 
 extern MagnetometerData mag_data;

@@ -84,12 +84,12 @@ void getMagneticNorth(){
   mag_north_comp[2] = magEvent.magnetic.z;
   
   #if CALIBRATE_MAGNETOMETER //**MAY BE REMOVED IN FUTURE**
-  calibrateMagnetometer(*mag_north_comp);
+  calibrateMagnetometer((float*)mag_north_comp);
   #endif
   
   mag_data.x = mag_north_comp[0];
   mag_data.y = mag_north_comp[1];
   mag_data.z = mag_north_comp[2];
-  mag_data.angle = atan2(mag_data.y, mag_data.x);
+  mag_data.heading = degrees(atan2(mag_data.y, mag_data.x));
 }
 
