@@ -1,4 +1,5 @@
 #include "Logger.hpp"
+#include "Network.hpp"
 #include "TrackingServos.hpp"
 #include "Accelerometer.hpp"
 #include "Magnetometer.hpp"
@@ -24,14 +25,6 @@ void setup(){
 }
 
 void loop(){
-   
     tilt(0);
     pan(0);
-//    parseAcceleration();
-//    getMagneticNorth();
-//    Serial.print("Pitch: ");  
-//    Serial.print(accel_data.pitch);
-//    Serial.print(" Heading: ");
-//    Serial.println(mag_data.heading);
-//    delay(200);
 }

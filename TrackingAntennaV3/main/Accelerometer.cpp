@@ -1,4 +1,4 @@
- /**
+/**
  * @file   Accelerometer.cpp
  * @Author Michael Lenover (WARG)
  * @date   January 25, 2017
