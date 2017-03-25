@@ -22,3 +22,12 @@ void ipToString(const IPAddress* ip, char* string){
     sprintf(string, "%d.%d.%d.%d", oct1, oct2, oct3, oct4);
 }
 
+float dotProduct(int a1, int a2, int b1, int b2){
+	return (a1*b1 + a2*b2);
+}
+
+float magnitude(int a1, int a2){
+	return (sqrt((a1*a1) + (a2*a2)));
+}
+
+
