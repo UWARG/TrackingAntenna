@@ -43,5 +43,4 @@ void loop(){
     }
     
     renewNetwork(); 
-    delay(100);
 }
