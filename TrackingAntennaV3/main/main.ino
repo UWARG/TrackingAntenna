@@ -10,11 +10,10 @@
 
 long double dutch_lat = 43.530786;
 long double dutch_lon = -80.576991;
-
-long double sp_lat = 49.912919;
-long double sp_lon = -98.268920;
+float dutch_dec = -9.63; // magnetic declination (angle between mag north & pole)
 
 GPSLocation here;
+
 void setup(){
     initDebug();
     info("Starting up...");
@@ -27,7 +26,7 @@ void setup(){
     
     calibrateTilt();
     tilt(0);
-    calibratePan();
+    calibratePan(dutch_dec);
     pan(0);
 
     initNetwork();

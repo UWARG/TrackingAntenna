@@ -19,7 +19,7 @@ extern Init initialize;
 
 void calibrateTilt();
 
-void calibratePan();
+void calibratePan(float dec);
 
 
 void worldPan(float heading);

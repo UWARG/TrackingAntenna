@@ -13,6 +13,7 @@
 #include <math.h>
 
 #define SAMPLES 10
+#define WAIT 4000
 
 Init initialize;
 
@@ -20,35 +21,36 @@ void calibrateTilt(){
   //Set antenna to 0 degrees, as determined by servo encoder
   tilt(TILT_ANGLE_MIN_LIMIT / 10.f);
 
-  delay(5000); // wait for antenna to stabilize
+  delay(WAIT); // wait for antenna to stabilize
 
   // average accelerometer readings
   float angle = 0;
   for (int i = 0; i < SAMPLES; i++) {
     parseAcceleration();
     angle += accel_data.pitch;
-    delay(50);
+    delay(100);
   }
   initialize.tilt_min = angle / SAMPLES;
 
   // tilt to max limit
   tilt(TILT_ANGLE_MAX_LIMIT / 10.f);
 
-  delay(5000);
+  delay(WAIT);
 
   angle = 0;
   for (int i = 0; i < SAMPLES; i++) {
     parseAcceleration();
     angle += accel_data.pitch;
-    delay(50);
+    delay(100);
   }
   initialize.tilt_max = angle / SAMPLES;
 }
 
-void calibratePan() {
+// calibrate pan using local magnetic declination angle
+void calibratePan(float dec) {
   pan(PAN_ANGLE_LIMIT / -10.f);
 
-  delay(5000);
+  delay(WAIT);
 
   // average compass readings
   float angle = 0;
@@ -57,12 +59,12 @@ void calibratePan() {
     angle += mag_data.heading;
     delay(100);
   }
-  initialize.heading_min = angle / SAMPLES;
+  initialize.heading_min = (angle / SAMPLES) + dec;
 
   // tilt to max limit
   pan(PAN_ANGLE_LIMIT / 10.f);
 
-  delay(5000);
+  delay(WAIT);
 
   angle = 0;
   for (int i = 0; i < SAMPLES; i++) {
@@ -70,7 +72,7 @@ void calibratePan() {
     angle += mag_data.heading;
     delay(100);
   }
-  initialize.heading_max = angle / SAMPLES;
+  initialize.heading_max = (angle / SAMPLES) + dec;
 }
 
 void worldPan(float heading) {

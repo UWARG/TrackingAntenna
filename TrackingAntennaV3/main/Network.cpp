@@ -6,9 +6,7 @@
 
 #include "Network.hpp"
 #include "Logger.hpp"
-#include "Util.hpp"
 #include <string.h>
-#include <Ethernet.h>
 
 //represents the current state of the altitude, latitude, and longitude
 //defined globally

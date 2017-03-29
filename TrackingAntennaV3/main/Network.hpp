@@ -10,6 +10,8 @@
 #ifndef NETWORK
 #define NETWORK
 
+#include "Util.hpp"
+
 /**
  *IP adress of the data relay station and port
  */
@@ -37,18 +39,12 @@
 #define MAC_ADDR_5 0x2C
 #define MAC_ADDR_6 0x9A
 
-typedef struct {
-    float alt;
-    float lat;
-    float lon;
-} NetworkData;
-
 /**
  * Global variable representing the current state of the network data parsed.
  * Includes altitude, longitude, and longitude, which is all we really care about
  * for the tracking antenna.
  */
-extern NetworkData network_data;
+extern GPSLocation network_data;
 
 /**
  * Initializes the ethernet connection, attempts to connect to the data relay,

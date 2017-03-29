@@ -9,6 +9,12 @@
 
 #include <Ethernet.h>
 
+typedef struct {
+    float alt;
+    float lat;
+    float lon;
+} GPSLocation;
+
 void ipToString(const IPAddress* ip, char* string);
 
 float dotProduct(int a1, int a2, int b1, int b2);

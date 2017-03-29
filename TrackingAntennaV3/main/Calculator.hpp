@@ -13,12 +13,6 @@
 
 #define EARTH_RADIUS ((float)6371000)
 
-typedef struct {
-    float alt;
-    float lat;
-    float lon;
-} GPSLocation;
-
-void trackSpike(GPSLocation antenna_location, NetworkData plane_location);
+void trackSpike(GPSLocation antenna_location, GPSLocation plane_location);
 
 #endif
