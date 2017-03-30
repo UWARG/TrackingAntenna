@@ -32,6 +32,19 @@
 #define TILT_SERVO_PIN 8
 
 /**
+ * Because we'll never actually want the tracking antenna pointing all the
+ * way down or up, this places a software limit on how low/high the tracking antenna can tilt
+ * In tenth degrees.
+ */
+#define TILT_ANGLE_MIN_LIMIT 0
+#define TILT_ANGLE_MAX_LIMIT 600
+
+/**
+ * Limit in either direction, in tenth degrees
+ */
+#define PAN_ANGLE_LIMIT 1200
+
+/**
  * Initialize the servos. Need to be called before the pan and tilt functions are used
  */
 void initializeServos(void);
@@ -40,7 +53,7 @@ void initializeServos(void);
  * Control the pan of the tracking antenna
  * @param deg Desired angle in degrees. (0 is forward, CW is +ve)
  */
-void pan(int deg);
+void pan(float deg);
 
 /**
  * Control the tilt of the tracking antenna

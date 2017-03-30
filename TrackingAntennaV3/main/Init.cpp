@@ -76,7 +76,7 @@ void calibratePan(float dec) {
 }
 
 void worldPan(float heading) {
-  float angle = heading + 90.f;//mapf(heading, initialize.heading_min, initialize.heading_max, PAN_ANGLE_LIMIT / -10.f, PAN_ANGLE_LIMIT / 10.f);
+  float angle = heading - 180.f;//mapf(heading, initialize.heading_min, initialize.heading_max, PAN_ANGLE_LIMIT / -10.f, PAN_ANGLE_LIMIT / 10.f);
   pan(angle);
 }
 

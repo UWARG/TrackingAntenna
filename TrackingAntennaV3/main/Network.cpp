@@ -10,7 +10,7 @@
 
 //represents the current state of the altitude, latitude, and longitude
 //defined globally
-NetworkData network_data;
+GPSLocation network_data;
 
 //initialize the Ethernet client library
 static EthernetClient client;

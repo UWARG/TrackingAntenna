@@ -7,12 +7,12 @@
 #include "Calculator.hpp"
 #include "Init.hpp"
 
-
-long double dutch_lat = 43.530786;
-long double dutch_lon = -80.576991;
+// alt, lat, lon
+GPSLocation dutch = {1.0, 43.530786, -80.576991};
 float dutch_dec = -9.63; // magnetic declination (angle between mag north & pole)
 
-GPSLocation here;
+GPSLocation e5 = {1.0, 43.4725079, -80.5398190};
+float e5_dec = -9.62;
 
 void setup(){
     initDebug();
@@ -26,19 +26,16 @@ void setup(){
     
     calibrateTilt();
     tilt(0);
-    calibratePan(dutch_dec);
+    calibratePan(e5_dec);
     pan(0);
 
     initNetwork();
 
-    here.lat = dutch_lat;
-    here.lon = dutch_lon;
-    here.alt = 1;
 }
 
 void loop(){
     if (parsePacket()) {
-      trackSpike(here, network_data);
+      trackSpike(e5, network_data);
     }
     
     renewNetwork(); 
