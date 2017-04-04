@@ -25,7 +25,7 @@ void debug(const char* message){
 
 void error(const char* message){
 #if ERROR_MESSAGES
-    Serial.println( message);
+    Serial.println(message);
 #endif
 }
 

@@ -9,6 +9,7 @@
 #include "Accelerometer.hpp"
 #include "Magnetometer.hpp"
 #include "TrackingServos.hpp"
+#include "Logger.hpp"
 #include <Arduino.h>
 #include <math.h>
 
@@ -18,6 +19,7 @@
 Init initialize;
 
 void calibrateTilt(){
+  debug("Calibrating tilt servo...");
   //Set antenna to 0 degrees, as determined by servo encoder
   tilt(TILT_ANGLE_MIN_LIMIT / 10.f);
 
@@ -48,6 +50,7 @@ void calibrateTilt(){
 
 // calibrate pan using local magnetic declination angle
 void calibratePan(float dec) {
+  debug("Calibrating pan servo...");
   pan(PAN_ANGLE_LIMIT / -10.f);
 
   delay(WAIT);
