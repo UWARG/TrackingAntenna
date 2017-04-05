@@ -19,7 +19,7 @@
 #define PAN_SERVO_RANGE 60 // +/- this value pans left and right. 
 #define PAN_SERVO_PWM_MIN (PAN_SERVO_MID - PAN_SERVO_RANGE)
 #define PAN_SERVO_PWM_MAX (PAN_SERVO_MID + PAN_SERVO_RANGE)
-#define TILT_SERVO_PWM_MIN 1785 // this is the max tilt angle. doesn't matter precisely what this is.
+#define TILT_SERVO_PWM_MIN 1900 // this is the max tilt angle. doesn't matter precisely what this is.
 #define TILT_SERVO_PWM_MAX 2150 // servo is reversed via gear reduction, so this is flat
 
 /**
@@ -32,19 +32,6 @@
 #define TILT_SERVO_PIN 8
 
 /**
- * Because we'll never actually want the tracking antenna pointing all the
- * way down or up, this places a software limit on how low/high the tracking antenna can tilt
- * In tenth degrees.
- */
-#define TILT_ANGLE_MIN_LIMIT 0
-#define TILT_ANGLE_MAX_LIMIT 600
-
-/**
- * Limit in either direction, in tenth degrees
- */
-#define PAN_ANGLE_LIMIT 1200
-
-/**
  * Initialize the servos. Need to be called before the pan and tilt functions are used
  */
 void initializeServos(void);
@@ -53,12 +40,12 @@ void initializeServos(void);
  * Control the pan of the tracking antenna
  * @param deg Desired angle in degrees. (0 is forward, CW is +ve)
  */
-void pan(float deg);
+void pan(int pwm);
 
 /**
  * Control the tilt of the tracking antenna
  * @param deg Desired angle in degrees. (0 is flat, up is +ve)
  */
-void tilt(float deg);
+void tilt(int pwm);
 
 #endif

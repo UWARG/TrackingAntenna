@@ -21,7 +21,7 @@ Init initialize;
 void calibrateTilt(){
   debug("Calibrating tilt servo...");
   //Set antenna to 0 degrees, as determined by servo encoder
-  tilt(TILT_ANGLE_MIN_LIMIT / 10.f);
+  tilt(TILT_SERVO_PWM_MAX); // max because reversed
 
   delay(WAIT); // wait for antenna to stabilize
 
@@ -35,7 +35,7 @@ void calibrateTilt(){
   initialize.tilt_min = angle / SAMPLES;
 
   // tilt to max limit
-  tilt(TILT_ANGLE_MAX_LIMIT / 10.f);
+  tilt(TILT_SERVO_PWM_MIN);
 
   delay(WAIT);
 
@@ -51,7 +51,7 @@ void calibrateTilt(){
 // calibrate pan using local magnetic declination angle
 void calibratePan(float dec) {
   debug("Calibrating pan servo...");
-  pan(PAN_ANGLE_LIMIT / -10.f);
+  pan(PAN_SERVO_PWM_MIN);
 
   delay(WAIT);
 
@@ -65,7 +65,7 @@ void calibratePan(float dec) {
   initialize.heading_min = (angle / SAMPLES) + dec;
 
   // tilt to max limit
-  pan(PAN_ANGLE_LIMIT / 10.f);
+  pan(PAN_SERVO_PWM_MIN);
 
   delay(WAIT);
 
@@ -79,13 +79,13 @@ void calibratePan(float dec) {
 }
 
 void worldPan(float heading) {
-  float angle = heading - 180.f;//mapf(heading, initialize.heading_min, initialize.heading_max, PAN_ANGLE_LIMIT / -10.f, PAN_ANGLE_LIMIT / 10.f);
-  pan(angle);
+  int pwm = round(mapf(heading, initialize.heading_min, initialize.heading_max, PAN_SERVO_PWM_MIN, PAN_SERVO_PWM_MAX));
+  pan(pwm);
 }
 
 void worldTilt(float pitch) {
-  float angle = mapf(pitch, initialize.tilt_min, initialize.tilt_max, TILT_ANGLE_MIN_LIMIT / 10.f, TILT_ANGLE_MAX_LIMIT / 10.f);
-  tilt(angle);
+  int pwm = round(mapf(pitch, initialize.tilt_min, initialize.tilt_max, TILT_SERVO_PWM_MAX, TILT_SERVO_PWM_MIN)); // reversed on purpose (gearing)
+  tilt(pwm);
 }
 
 

@@ -18,16 +18,16 @@ void setup(){
     initDebug();
     info("Starting up...");
     initializeServos();
-    tilt(0);
-    pan(0);
+    tilt(TILT_SERVO_PWM_MAX);
+    pan(PAN_SERVO_MID);
 
     initMagnetometer();
     initAccelerometer();
     
     calibrateTilt();
-    tilt(0);
+    tilt(TILT_SERVO_PWM_MAX);
     calibratePan(e5_dec);
-    pan(0);
+    pan(PAN_SERVO_MID);
 
     initNetwork();
 
