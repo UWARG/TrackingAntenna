@@ -19,7 +19,7 @@ void trackSpike(GPSLocation antenna_location, GPSLocation plane_location) {
   // highly unlikely that we'll have problems if we fly too far. 10 km over earth's surface is ~0.09 degrees.
   // over 10 km, ~8 m of vertical drop due to curvature. flying at 100 m, that's 0.45 degrees of error in tilt.
   long double lat_dist = EARTH_RADIUS * lat_dif;
-	long double lon_dist = EARTH_RADIUS * lon_dif * cos(radians(antenna_location.lat + plane_location.lat) / 2.f);
+	long double lon_dist = EARTH_RADIUS * lon_dif * cos(radians(antenna_location.lat + plane_location.lat) / 2.f); // average the latitudes
 
 	long double tot_dist = hypot(lat_dist, lon_dist); //The distance between the plane and the ground station.
 
