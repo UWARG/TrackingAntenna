@@ -7,6 +7,8 @@
 #include "Network.hpp"
 #include "Logger.hpp"
 #include <string.h>
+#include <stdlib.h>
+#include <math.h>
 
 //represents the current state of the altitude, latitude, and longitude
 //defined globally
@@ -73,13 +75,21 @@ bool parsePacket(void){
             //check if the index of the data we just read corresponds to the altitude, longitude, or altitude
             //if so convert the received string to float and save the corresponding values
             if(lines_read == alt_index){
-                network_data.alt = atof(data_buffer);
+                double tmp = atof(data_buffer);
+                if (tmp != 0.0) {
+                    network_data.alt = tmp;
+                }
             } else if(lines_read == lat_index){
-                network_data.lat = atof(data_buffer);
+                double tmp = atof(data_buffer);
+                if (tmp != 0.0) {
+                    network_data.lat = tmp;
+                }
             } else if(lines_read == lon_index){
-                network_data.lon = atof(data_buffer);
+                double tmp = atof(data_buffer);
+                if (tmp != 0.0) {
+                    network_data.lon = tmp;
+                }
             }
-
             buffer_counter = 0;
             lines_read++;
         } else if (c == '\n') { //we've reached the end of the packet, break out of the loop

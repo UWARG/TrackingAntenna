@@ -11,8 +11,8 @@
 
 typedef struct {
     float alt;
-    float lat;
-    float lon;
+    double lat;
+    double lon;
 } GPSLocation;
 
 void ipToString(const IPAddress* ip, char* string);
