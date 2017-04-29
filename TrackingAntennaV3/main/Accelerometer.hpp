@@ -26,11 +26,13 @@
  * Accelerometer data struct 
  * Contains x,y,z components of vector pointing in direction of gravity
  * Units in m/s^2
+ * Also pitch in degrees
  */
 typedef struct {
   float x;
   float y;
   float z;
+  float pitch;
 } AccelerometerData;
 
 extern AccelerometerData accel_data;
@@ -39,7 +41,7 @@ extern AccelerometerData accel_data;
  * Initializes accelerometer
  * Outputs debug messages if unable to connect or initialize
  */
-bool initAccelerometer(void);//Comment
+bool initAccelerometer(void);
 
 
 /**
